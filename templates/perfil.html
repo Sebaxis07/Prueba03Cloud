@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Costa Laguna Segura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'costa-green': '#10B981',
+                        'costa-green-dark': '#059669',
+                        'costa-green-light': '#34D399',
+                        'costa-black': '#111827',
+                        'costa-gray-dark': '#1F2937',
+                        'costa-gray-light': '#F9FAFB',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-glow': 'pulse-glow 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), 0 0 40px rgba(16, 185, 129, 0.3); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #111827, #1F2937, #111827);
+        }
+        .glassmorphism {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .glassmorphism-light {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+        .glassmorphism-card {
+            background: rgba(31, 41, 55, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #10B981, #34D399);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+        .floating-elements {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .floating-element {
+            position: absolute;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .profile-image-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(16, 185, 129, 0.5);
+            transition: all 0.3s ease;
+        }
+        .profile-image:hover {
+            transform: scale(1.05);
+            border-color: rgba(16, 185, 129, 0.8);
+        }
+        .upload-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        .profile-image-container:hover .upload-overlay {
+            opacity: 1;
+        }
+        .default-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10B981, #34D399);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid rgba(16, 185, 129, 0.5);
+            transition: all 0.3s ease;
+        }
+        .default-avatar:hover {
+            transform: scale(1.05);
+            border-color: rgba(16, 185, 129, 0.8);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen relative">
+    <!-- Elementos flotantes de fondo -->
+    <div class="floating-elements">
+        <div class="floating-element w-12 h-12 top-10 left-10" style="animation-delay: 0s;"></div>
+        <div class="floating-element w-8 h-8 top-1/4 right-20" style="animation-delay: 1s;"></div>
+        <div class="floating-element w-16 h-16 bottom-20 left-1/4" style="animation-delay: 2s;"></div>
+        <div class="floating-element w-10 h-10 bottom-10 right-10" style="animation-delay: 1.5s;"></div>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="glassmorphism shadow-2xl relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'dashboard' %}" class="group flex items-center text-white hover:text-costa-green transition-all duration-300">
+                        <i data-lucide="arrow-left" class="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                        Volver al Dashboard
+                    </a>
+                    <div class="hidden md:block w-px h-6 bg-costa-green/30"></div>
+                    <a href="{% url 'home' %}" class="group flex items-center text-gray-300 hover:text-white transition-colors">
+                        <i data-lucide="shield-alert" class="h-6 w-6 text-costa-green mr-2 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-bold">Costa Laguna</span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300 text-sm">
+                        <i data-lucide="user" class="inline h-4 w-4 mr-1"></i>
+                        {{ user.get_full_name|default:user.username }}
+                    </span>
+                    <a href="{% url 'logout' %}" class="group text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-white/10">
+                        <i data-lucide="log-out" class="inline h-4 w-4 mr-1"></i>
+                        Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 relative z-10">
+            {% for message in messages %}
+                <div class="mb-4 glassmorphism-light p-4 rounded-xl shadow-xl animate-slide-up {% if message.tags == 'error' %}border-red-500/50{% elif message.tags == 'success' %}border-costa-green/50{% elif message.tags == 'warning' %}border-yellow-500/50{% else %}border-blue-500/50{% endif %}">
+                    <div class="flex items-center">
+                        <div class="p-2 rounded-full {% if message.tags == 'error' %}bg-red-500/20{% elif message.tags == 'success' %}bg-costa-green/20{% elif message.tags == 'warning' %}bg-yellow-500/20{% else %}bg-blue-500/20{% endif %} mr-3">
+                            <i data-lucide="{% if message.tags == 'error' %}alert-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" 
+                               class="h-5 w-5 {% if message.tags == 'error' %}text-red-400{% elif message.tags == 'success' %}text-costa-green{% elif message.tags == 'warning' %}text-yellow-400{% else %}text-blue-400{% endif %}"></i>
+                        </div>
+                        <span class="{% if message.tags == 'error' %}text-red-300{% elif message.tags == 'success' %}text-green-300{% elif message.tags == 'warning' %}text-yellow-300{% else %}text-blue-300{% endif %} font-medium">
+                            {{ message }}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        <!-- Header del perfil -->
+        <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up mb-8">
+            <div class="relative p-6 bg-gradient-to-r from-costa-green to-costa-green-dark backdrop-blur-xl">
+                <div class="absolute inset-0 bg-costa-green/20 backdrop-blur-sm"></div>
+                
+                <div class="relative z-10">
+                    <h1 class="text-2xl md:text-3xl font-bold mb-2 text-white drop-shadow-lg flex items-center">
+                        <i data-lucide="user-circle" class="h-8 w-8 mr-3"></i>
+                        Mi Perfil
+                    </h1>
+                    <p class="text-white/90">Administra tu información personal y configuración de cuenta</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de perfil -->
+        <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up" style="animation-delay: 0.2s;">
+            <form method="post" enctype="multipart/form-data" id="perfil-form">
+                {% csrf_token %}
+                
+                <!-- Sección de foto de perfil -->
+                <div class="glassmorphism-light px-6 py-8 border-b border-costa-green/20 text-center">
+                    <h2 class="text-xl font-semibold text-white mb-6 flex items-center justify-center">
+                        <div class="p-2 bg-costa-green/20 rounded-lg mr-3">
+                            <i data-lucide="camera" class="h-5 w-5 text-costa-green"></i>
+                        </div>
+                        Foto de Perfil
+                    </h2>
+                    
+                    <div class="profile-image-container">
+                        {% if perfil.foto_perfil %}
+                            <img src="{{ perfil.foto_perfil.url }}" alt="Foto de perfil" class="profile-image" id="profile-image">
+                            <div class="upload-overlay" onclick="document.getElementById('foto-perfil-input').click();">
+                                <i data-lucide="camera" class="h-8 w-8 text-white"></i>
+                            </div>
+                        {% else %}
+                            <div class="default-avatar" onclick="document.getElementById('foto-perfil-input').click();">
+                                <i data-lucide="user" class="h-16 w-16 text-white"></i>
+                                <div class="upload-overlay">
+                                    <i data-lucide="camera" class="h-8 w-8 text-white"></i>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {{ form.foto_perfil }}
+                    
+                    <div class="mt-4 flex justify-center space-x-3">
+                        <button type="button" onclick="document.getElementById('foto-perfil-input').click();" 
+                                class="group btn-gradient text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <i data-lucide="upload" class="inline h-4 w-4 mr-2 group-hover:scale-110 transition-transform"></i>
+                            {% if perfil.foto_perfil %}Cambiar foto{% else %}Subir foto{% endif %}
+                        </button>
+                        
+                        {% if perfil.foto_perfil %}
+                        <button type="button" onclick="eliminarFotoPerfil()" 
+                                class="group glassmorphism border border-red-500/50 text-red-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:bg-red-500/10">
+                            <i data-lucide="trash-2" class="inline h-4 w-4 mr-2 group-hover:scale-110 transition-transform"></i>
+                            Eliminar
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mt-2">{{ form.foto_perfil.help_text }}</p>
+                </div>
+
+                <!-- Información personal -->
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-white mb-6 flex items-center">
+                        <div class="p-2 bg-costa-green/20 rounded-lg mr-3">
+                            <i data-lucide="user-check" class="h-5 w-5 text-costa-green"></i>
+                        </div>
+                        Información Personal
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Nombres -->
+                        <div>
+                            <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                                <i data-lucide="user" class="inline h-4 w-4 mr-1"></i>
+                                {{ form.first_name.label }}
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <p class="mt-1 text-sm text-red-400">{{ form.first_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Apellidos -->
+                        <div>
+                            <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                                <i data-lucide="user" class="inline h-4 w-4 mr-1"></i>
+                                {{ form.last_name.label }}
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <p class="mt-1 text-sm text-red-400">{{ form.last_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="md:col-span-2">
+                            <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                                <i data-lucide="mail" class="inline h-4 w-4 mr-1"></i>
+                                {{ form.email.label }}
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <p class="mt-1 text-sm text-red-400">{{ form.email.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div>
+                            <label for="{{ form.telefono.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                                <i data-lucide="phone" class="inline h-4 w-4 mr-1"></i>
+                                {{ form.telefono.label }}
+                            </label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}
+                                <p class="mt-1 text-sm text-red-400">{{ form.telefono.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Sector -->
+                        <div>
+                            <label for="{{ form.sector.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+                                <i data-lucide="map-pin" class="inline h-4 w-4 mr-1"></i>
+                                {{ form.sector.label }}
+                            </label>
+                            {{ form.sector }}
+                            {% if form.sector.errors %}
+                                <p class="mt-1 text-sm text-red-400">{{ form.sector.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de cuenta -->
+                <div class="glassmorphism-light px-6 py-4 border-t border-costa-green/20">
+                    <h3 class="text-lg font-medium text-white mb-4 flex items-center">
+                        <i data-lucide="shield" class="h-5 w-5 text-costa-green mr-2"></i>
+                        Información de Cuenta
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div class="text-center p-3 bg-white/5 rounded-lg">
+                            <span class="text-gray-400 block mb-1">Usuario:</span>
+                            <div class="font-medium text-costa-green">{{ user.username }}</div>
+                        </div>
+                        <div class="text-center p-3 bg-white/5 rounded-lg">
+                            <span class="text-gray-400 block mb-1">Miembro desde:</span>
+                            <div class="font-medium text-gray-300">{{ user.date_joined|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="text-center p-3 bg-white/5 rounded-lg">
+                            <span class="text-gray-400 block mb-1">Último acceso:</span>
+                            <div class="font-medium text-gray-300">{{ user.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="p-6 border-t border-costa-green/20 flex justify-between items-center">
+                    <a href="{% url 'dashboard' %}" class="group glassmorphism border border-gray-500/50 text-gray-300 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:bg-white/10">
+                        <i data-lucide="x" class="inline h-4 w-4 mr-2"></i>
+                        Cancelar
+                    </a>
+                    
+                    <button type="submit" class="group btn-gradient text-white px-8 py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <i data-lucide="save" class="inline h-4 w-4 mr-2 group-hover:scale-110 transition-transform"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Acciones adicionales -->
+        <div class="mt-8 glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up" style="animation-delay: 0.4s;">
+            <div class="glassmorphism-light px-6 py-4 border-b border-costa-green/20">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <div class="p-2 bg-costa-green/20 rounded-lg mr-3">
+                        <i data-lucide="settings" class="h-5 w-5 text-costa-green"></i>
+                    </div>
+                    Acciones de Cuenta
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{% url 'mis_avisos' %}" class="group glassmorphism-light border border-blue-500/30 p-4 rounded-xl hover:border-blue-400/50 transition-all duration-300 transform hover:scale-105">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-500/20 rounded-lg mr-3">
+                                <i data-lucide="list" class="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform"></i>
+                            </div>
+                            <span class="text-blue-300 font-medium">Mis Avisos</span>
+                        </div>
+                    </a>
+                    <a href="{% url 'crear_aviso' %}" class="group glassmorphism-light border border-costa-green/30 p-4 rounded-xl hover:border-costa-green/50 transition-all duration-300 transform hover:scale-105">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-costa-green/20 rounded-lg mr-3">
+                                <i data-lucide="plus" class="h-5 w-5 text-costa-green group-hover:scale-110 transition-transform"></i>
+                            </div>
+                            <span class="text-costa-green font-medium">Crear Aviso</span>
+                        </div>
+                    </a>
+                    <button onclick="cambiarContrasena()" class="group glassmorphism-light border border-yellow-500/30 p-4 rounded-xl hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-yellow-500/20 rounded-lg mr-3">
+                                <i data-lucide="key" class="h-5 w-5 text-yellow-400 group-hover:scale-110 transition-transform"></i>
+                            </div>
+                            <span class="text-yellow-300 font-medium">Cambiar Contraseña</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar iconos Lucide
+        lucide.createIcons();
+        
+        // Preview de imagen
+        document.getElementById('foto-perfil-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar tamaño
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('La imagen no puede superar los 5MB', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validar tipo
+                if (!file.type.startsWith('image/')) {
+                    showMessage('Solo se permiten archivos de imagen', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Mostrar preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const container = document.querySelector('.profile-image-container');
+                    container.innerHTML = `
+                        <img src="${e.target.result}" alt="Foto de perfil" class="profile-image" id="profile-image">
+                        <div class="upload-overlay" onclick="document.getElementById('foto-perfil-input').click();">
+                            <i data-lucide="camera" class="h-8 w-8 text-white"></i>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+                
+                showMessage('Imagen cargada. Recuerda guardar los cambios.', 'info');
+            }
+        });
+        
+        // Función para eliminar foto de perfil
+        function eliminarFotoPerfil() {
+            if (confirm('¿Estás seguro de que quieres eliminar tu foto de perfil?')) {
+                fetch('{% url "eliminar_foto_perfil" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reemplazar con avatar por defecto
+                        const container = document.querySelector('.profile-image-container');
+                        container.innerHTML = `
+                            <div class="default-avatar" onclick="document.getElementById('foto-perfil-input').click();">
+                                <i data-lucide="user" class="h-16 w-16 text-white"></i>
+                                <div class="upload-overlay">
+                                    <i data-lucide="camera" class="h-8 w-8 text-white"></i>
+                                </div>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                        showMessage(data.mensaje, 'success');
+                    } else {
+                        showMessage(data.mensaje, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error de conexión', 'error');
+                });
+            }
+        }
+        
+        // Función para cambiar contraseña (placeholder)
+        function cambiarContrasena() {
+            showMessage('Función disponible próximamente', 'info');
+        }
+        
+        // Función para mostrar mensajes
+        function showMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 p-4 rounded-xl z-50 transition-all duration-500 transform translate-x-full glassmorphism-light border shadow-2xl ${
+                type === 'success' ? 'border-costa-green/50 text-costa-green' : 
+                type === 'warning' ? 'border-yellow-500/50 text-yellow-400' :
+                type === 'info' ? 'border-blue-500/50 text-blue-400' :
+                'border-red-500/50 text-red-400'
+            }`;
+            messageDiv.innerHTML = `
+                <div class="flex items-center">
+                    <div class="p-1 ${type === 'success' ? 'bg-costa-green/20' : type === 'warning' ? 'bg-yellow-500/20' : type === 'info' ? 'bg-blue-500/20' : 'bg-red-500/20'} rounded mr-2">
+                        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'warning' ? 'alert-triangle' : type === 'info' ? 'info' : 'alert-circle'}" class="h-4 w-4"></i>
+                    </div>
+                    <span class="font-medium">${text}</span>
+                </div>
+            `;
+            document.body.appendChild(messageDiv);
+            
+            // Re-inicializar iconos
+            lucide.createIcons();
+            
+            // Animar entrada
+            setTimeout(() => {
+                messageDiv.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remover después de 5 segundos
+            setTimeout(() => {
+                messageDiv.classList.add('translate-x-full');
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        // Validación del formulario
+        document.getElementById('perfil-form').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Deshabilitar botón
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i data-lucide="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Guardando...';
+            
+            // Re-habilitar después de un tiempo en caso de error
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                lucide.createIcons();
+            }, 5000);
+        });
+        
+        // Re-inicializar iconos después de cargar
+        setTimeout(() => {
+            lucide.createIcons();
+        }, 100);
+    </script>
+</body>
+</html>

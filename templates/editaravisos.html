@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Aviso - Costa Laguna Segura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navegación simple -->
+    <nav class="bg-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'aviso_detalle' object.pk %}" class="flex items-center text-white hover:text-blue-400">
+                    <i data-lucide="arrow-left" class="h-5 w-5 mr-2"></i>
+                    Volver al aviso
+                </a>
+                <span class="text-white font-medium">Editando: {{ object.titulo|truncatechars:30 }}</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white rounded-lg shadow-lg">
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-gray-900">Editar Aviso</h1>
+                <p class="text-gray-600 mt-2">Actualiza la información de tu reporte</p>
+            </div>
+
+            <!-- Información actual del aviso -->
+            <div class="p-6 border-b border-gray-200 bg-blue-50">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ object.get_prioridad_bg_color }}">
+                        {{ object.get_prioridad_display }}
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                        {{ object.get_tipo_display }}
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600">
+                    <i data-lucide="calendar" class="inline h-4 w-4 mr-1"></i>
+                    Creado el {{ object.fecha_creacion|date:"d/m/Y H:i" }}
+                </p>
+                {% if object.fecha_actualizacion != object.fecha_creacion %}
+                <p class="text-sm text-gray-600 mt-1">
+                    <i data-lucide="edit" class="inline h-4 w-4 mr-1"></i>
+                    Última actualización: {{ object.fecha_actualizacion|date:"d/m/Y H:i" }}
+                </p>
+                {% endif %}
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+                {% csrf_token %}
+                
+                <!-- Título -->
+                <div>
+                    <label for="{{ form.titulo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        Título del Aviso *
+                    </label>
+                    {{ form.titulo }}
+                    {% if form.titulo.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.titulo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Tipo y Prioridad -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.tipo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Tipo de Aviso *
+                        </label>
+                        {{ form.tipo }}
+                        {% if form.tipo.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.tipo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.prioridad.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Prioridad *
+                        </label>
+                        {{ form.prioridad }}
+                        {% if form.prioridad.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.prioridad.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div>
+                    <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        Descripción Detallada *
+                    </label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.descripcion.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Ubicación -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.direccion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Dirección *
+                        </label>
+                        {{ form.direccion }}
+                        {% if form.direccion.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.direccion.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.sector.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Sector *
+                        </label>
+                        {{ form.sector }}
+                        {% if form.sector.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.sector.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Teléfono e Imagen -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.telefono_contacto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Teléfono de Contacto
+                        </label>
+                        {{ form.telefono_contacto }}
+                        {% if form.telefono_contacto.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.telefono_contacto.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">Opcional</p>
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.imagen.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Imagen
+                        </label>
+                        {% if object.imagen %}
+                            <div class="mb-2">
+                                <img src="{{ object.imagen.url }}" alt="Imagen actual" class="h-20 w-20 object-cover rounded border">
+                                <p class="text-xs text-gray-500 mt-1">Imagen actual</p>
+                            </div>
+                        {% endif %}
+                        {{ form.imagen }}
+                        {% if form.imagen.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.imagen.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">Máximo 5MB. Deja vacío para mantener la imagen actual.</p>
+                    </div>
+                </div>
+
+                <!-- Opciones adicionales -->
+                <div class="flex items-center">
+                    {{ form.es_anonimo }}
+                    <label for="{{ form.es_anonimo.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                        Publicar de forma anónima
+                    </label>
+                </div>
+
+                <!-- Errores generales del formulario -->
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Botones -->
+                <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                    <a href="{% url 'aviso_detalle' object.pk %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        Cancelar
+                    </a>
+                    <div class="flex space-x-3">
+                        <a href="{% url 'mis_avisos' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                            Ver mis avisos
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <i data-lucide="save" class="inline h-4 w-4 mr-2"></i>
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

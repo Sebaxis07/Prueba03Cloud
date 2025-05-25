@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Costa Laguna Segura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'costa-green': '#10B981',
+                        'costa-green-dark': '#059669',
+                        'costa-green-light': '#34D399',
+                        'costa-black': '#111827',
+                        'costa-gray-dark': '#1F2937',
+                        'costa-gray-light': '#F9FAFB',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 2s infinite',
+                        'shake': 'shake 0.5s ease-in-out',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), 0 0 40px rgba(16, 185, 129, 0.3); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #111827, #1F2937, #111827);
+        }
+        .glassmorphism {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .glassmorphism-light {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+        .form-input {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #10B981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            background: rgba(31, 41, 55, 0.9);
+            transform: translateY(-1px);
+        }
+        .form-input::placeholder {
+            color: rgb(156, 163, 175);
+        }
+        .floating-elements {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .floating-element {
+            position: absolute;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #10B981, #34D399);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+        .error-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        .rut-hint {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: #10B981;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .rut-hint.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen relative overflow-hidden">
+    <!-- Elementos flotantes de fondo -->
+    <div class="floating-elements">
+        <div class="floating-element w-20 h-20 top-10 left-10" style="animation-delay: 0s;"></div>
+        <div class="floating-element w-16 h-16 top-1/4 right-20" style="animation-delay: 1s;"></div>
+        <div class="floating-element w-12 h-12 bottom-20 left-1/4" style="animation-delay: 2s;"></div>
+        <div class="floating-element w-24 h-24 bottom-10 right-10" style="animation-delay: 1.5s;"></div>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-md w-full space-y-8 animate-fade-in">
+            <!-- Header -->
+            <div class="text-center animate-slide-up">
+                <div class="flex justify-center mb-6">
+                    <div class="relative">
+                        <div class="bg-gradient-to-r from-costa-green to-costa-green-light p-4 rounded-full shadow-2xl animate-pulse-glow">
+                            <i data-lucide="shield-check" class="h-12 w-12 text-white animate-float"></i>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-costa-green rounded-full animate-ping"></div>
+                    </div>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
+                    Bienvenido de vuelta
+                </h2>
+                <p class="text-gray-300 text-lg">Ingresa a tu cuenta de Costa Laguna Segura</p>
+                <div class="flex items-center justify-center mt-4 space-x-2">
+                    <div class="w-2 h-2 bg-costa-green rounded-full animate-pulse"></div>
+                    <span class="text-costa-green text-sm font-medium">Sistema Seguro</span>
+                    <div class="w-2 h-2 bg-costa-green rounded-full animate-pulse"></div>
+                </div>
+            </div>
+
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 glassmorphism p-4 rounded-xl shadow-xl animate-slide-up {% if message.tags == 'error' %}border-red-500/50 error-shake{% else %}border-green-500/50{% endif %}">
+                        <div class="flex items-center">
+                            <div class="p-2 rounded-full {% if message.tags == 'error' %}bg-red-500/20{% else %}bg-green-500/20{% endif %} mr-3">
+                                <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle{% endif %}" 
+                                   class="h-5 w-5 {% if message.tags == 'error' %}text-red-400{% else %}text-green-400{% endif %}"></i>
+                            </div>
+                            <span class="{% if message.tags == 'error' %}text-red-300{% else %}text-green-300{% endif %} font-medium">
+                                {{ message }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulario -->
+            <div class="glassmorphism py-8 px-6 shadow-2xl rounded-2xl animate-slide-up backdrop-blur-xl" style="animation-delay: 0.2s;">
+                <form method="post" class="space-y-6" id="loginForm">
+                    {% csrf_token %}
+                    
+                    <!-- Username/RUT -->
+                    <div class="relative">
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                            <div class="p-1 bg-costa-green/20 rounded mr-2">
+                                <i data-lucide="user" class="h-4 w-4 text-costa-green"></i>
+                            </div>
+                            Usuario o RUT
+                        </label>
+                        <div class="relative">
+                            <input type="text" 
+                                   name="{{ form.username.name }}" 
+                                   id="{{ form.username.id_for_label }}"
+                                   class="form-input pl-12 pr-20"
+                                   placeholder="Ingresa tu usuario o RUT"
+                                   autocomplete="username"
+                                   required>
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="user" class="h-5 w-5 text-costa-green"></i>
+                            </div>
+                            <div class="rut-hint" id="rutHint">
+                                <i data-lucide="fingerprint" class="h-4 w-4"></i>
+                            </div>
+                        </div>
+                        {% if form.username.errors %}
+                            <p class="mt-2 text-sm text-red-400 flex items-center glassmorphism-light p-2 rounded-lg">
+                                <i data-lucide="alert-circle" class="h-4 w-4 mr-2"></i>
+                                {{ form.username.errors.0 }}
+                            </p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-400">
+                            Puedes usar tu nombre de usuario o RUT (ej: 12345678-9)
+                        </p>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="relative">
+                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                            <div class="p-1 bg-costa-green/20 rounded mr-2">
+                                <i data-lucide="lock" class="h-4 w-4 text-costa-green"></i>
+                            </div>
+                            Contraseña
+                        </label>
+                        <div class="relative">
+                            <input type="password" 
+                                   name="{{ form.password.name }}" 
+                                   id="{{ form.password.id_for_label }}"
+                                   class="form-input pl-12 pr-12"
+                                   placeholder="Ingresa tu contraseña"
+                                   autocomplete="current-password"
+                                   required>
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="lock" class="h-5 w-5 text-costa-green"></i>
+                            </div>
+                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <i data-lucide="eye" id="togglePasswordIcon" class="h-5 w-5 text-gray-400 hover:text-costa-green transition-colors"></i>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                            <p class="mt-2 text-sm text-red-400 flex items-center glassmorphism-light p-2 rounded-lg">
+                                <i data-lucide="alert-circle" class="h-4 w-4 mr-2"></i>
+                                {{ form.password.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Errores generales -->
+                    {% if form.non_field_errors %}
+                        <div class="glassmorphism-light border border-red-500/50 p-4 rounded-xl shadow-lg error-shake">
+                            <div class="flex items-start">
+                                <div class="p-2 bg-red-500/20 rounded-full mr-3">
+                                    <i data-lucide="alert-triangle" class="h-5 w-5 text-red-400"></i>
+                                </div>
+                                <div class="text-red-300">
+                                    {% for error in form.non_field_errors %}
+                                        <p class="font-medium">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Botón Submit -->
+                    <div class="pt-2">
+                        <button type="submit" class="w-full group btn-gradient text-white py-4 px-6 rounded-xl shadow-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-costa-green/30">
+                            <div class="flex items-center justify-center">
+                                <i data-lucide="log-in" class="mr-3 h-6 w-6 group-hover:translate-x-1 transition-transform"></i>
+                                Iniciar Sesión
+                            </div>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Links adicionales -->
+                <div class="mt-8">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-costa-green/30"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 glassmorphism-light text-gray-300 rounded-full">¿No tienes cuenta?</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <a href="{% url 'registro' %}" class="group w-full flex justify-center py-4 px-6 border border-costa-green/50 rounded-xl glassmorphism-light text-lg font-medium text-white hover:bg-costa-green/10 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                            <i data-lucide="user-plus" class="mr-3 h-6 w-6 text-costa-green group-hover:scale-110 transition-transform"></i>
+                            Crear una cuenta
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volver al inicio -->
+            <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">
+                <a href="{% url 'home' %}" class="group inline-flex items-center text-costa-green hover:text-costa-green-light text-lg font-medium transition-all duration-300 glassmorphism-light px-6 py-3 rounded-xl hover:shadow-xl transform hover:scale-105">
+                    <i data-lucide="arrow-left" class="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Volver al inicio
+                </a>
+            </div>
+
+            <!-- Información de seguridad -->
+            <div class="text-center glassmorphism p-4 rounded-xl shadow-xl animate-slide-up" style="animation-delay: 0.6s;">
+                <div class="flex items-center justify-center space-x-4 text-sm text-gray-400">
+                    <div class="flex items-center">
+                        <i data-lucide="shield" class="h-4 w-4 mr-1 text-costa-green"></i>
+                        <span>Conexión Segura</span>
+                    </div>
+                    <div class="w-1 h-4 bg-costa-green/30"></div>
+                    <div class="flex items-center">
+                        <i data-lucide="lock" class="h-4 w-4 mr-1 text-costa-green"></i>
+                        <span>Datos Protegidos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        // Form validation enhancements
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const icon = submitBtn.querySelector('i');
+            
+            // Change button state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75');
+            icon.setAttribute('data-lucide', 'loader');
+            icon.classList.add('animate-spin');
+            
+            // Re-create icons
+            lucide.createIcons();
+        });
+
+        // Input animations
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('scale-105');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('scale-105');
+            });
+        });
+
+        // Smart RUT detection (much more conservative)
+        const usernameInput = document.getElementById('{{ form.username.id_for_label }}');
+        const rutHint = document.getElementById('rutHint');
+        
+        usernameInput.addEventListener('input', function(e) {
+            const value = e.target.value.trim();
+            
+            // Only show RUT hint if it REALLY looks like a RUT
+            if (isLikelyRUT(value)) {
+                rutHint.classList.add('show');
+                // Optional: format only if user explicitly indicates it's a RUT
+                // (e.g., by adding a dash or dots)
+                if (value.includes('-') || value.includes('.')) {
+                    e.target.value = formatRUT(value);
+                }
+            } else {
+                rutHint.classList.remove('show');
+            }
+        });
+
+        function isLikelyRUT(value) {
+            // More conservative: only consider it a RUT if:
+            // 1. It has 8-9 characters
+            // 2. It's mostly numbers
+            // 3. It ends with a number or K/k
+            // 4. It doesn't contain common username patterns (letters mixed with numbers like "user123")
+            
+            const cleanValue = value.replace(/[.-]/g, '');
+            
+            // Must be 7-9 chars (without separators)
+            if (cleanValue.length < 7 || cleanValue.length > 9) return false;
+            
+            // Must end with number or K
+            if (!/[0-9kK]$/i.test(cleanValue)) return false;
+            
+            // Must be mostly numbers (at least 7 digits)
+            const digitCount = (cleanValue.match(/\d/g) || []).length;
+            if (digitCount < 7) return false;
+            
+            // Exclude common username patterns
+            if (/^[a-zA-Z]+\d{1,3}$/.test(cleanValue)) return false; // like "user123"
+            if (/^\d{1,3}[a-zA-Z]+/.test(cleanValue)) return false; // like "123user"
+            
+            // If it looks like a sequence of digits + final char, it's likely a RUT
+            return /^\d{7,8}[0-9kK]$/i.test(cleanValue);
+        }
+
+        function formatRUT(rut) {
+            // Clean the RUT
+            let clean = rut.replace(/[^0-9kK]/gi, '');
+            
+            // Don't format if too short or too long
+            if (clean.length < 7 || clean.length > 9) return rut;
+            
+            // Add the dash before the last character
+            if (clean.length >= 2) {
+                clean = clean.slice(0, -1) + '-' + clean.slice(-1);
+            }
+            
+            // Add dots for thousands
+            if (clean.length > 5) {
+                const body = clean.slice(0, -2); // everything except dash and last char
+                const end = clean.slice(-2); // dash and last char
+                
+                // Add dots every 3 digits from right to left
+                const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                clean = formatted + end;
+            }
+            
+            return clean;
+        }
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements
+        document.querySelectorAll('.animate-slide-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Easter egg: konami code
+        let konamiCode = [];
+        const correctCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
+        
+        document.addEventListener('keydown', function(e) {
+            konamiCode.push(e.code);
+            if (konamiCode.length > correctCode.length) {
+                konamiCode.shift();
+            }
+            
+            if (konamiCode.join(',') === correctCode.join(',')) {
+                // Add special effect
+                document.body.style.filter = 'hue-rotate(180deg)';
+                setTimeout(() => {
+                    document.body.style.filter = '';
+                }, 3000);
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + R to focus RUT/username field
+            if (e.altKey && e.key === 'r') {
+                e.preventDefault();
+                usernameInput.focus();
+            }
+            
+            // Alt + P to focus password field
+            if (e.altKey && e.key === 'p') {
+                e.preventDefault();
+                document.getElementById('{{ form.password.id_for_label }}').focus();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Avisos - Costa Laguna Segura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'costa-green': '#10B981',
+                        'costa-green-dark': '#059669',
+                        'costa-green-light': '#34D399',
+                        'costa-black': '#111827',
+                        'costa-gray-dark': '#1F2937',
+                        'costa-gray-light': '#F9FAFB',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #111827, #1F2937);
+        }
+        .glassmorphism {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .glassmorphism-light {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -12px rgba(16, 185, 129, 0.15);
+        }
+        .form-input, .form-select {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: white;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #10B981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            background: rgba(31, 41, 55, 0.9);
+        }
+        .form-input::placeholder {
+            color: rgb(156, 163, 175);
+        }
+        mark {
+            background: rgba(16, 185, 129, 0.3);
+            color: #34D399;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-costa-black via-costa-gray-dark to-black min-h-screen">
+    <!-- Navegación -->
+    <nav class="gradient-bg backdrop-blur-sm shadow-2xl sticky top-0 z-50 border-b border-costa-green/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'home' %}" class="flex items-center text-white hover:text-costa-green transition-all group">
+                        <div class="relative">
+                            <i data-lucide="shield-alert" class="h-6 w-6 text-costa-green mr-2 group-hover:scale-110 transition-transform"></i>
+                            <div class="absolute -top-1 -right-1 w-2 h-2 bg-costa-green rounded-full animate-ping"></div>
+                        </div>
+                        <span class="font-bold bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">Costa Laguna Segura</span>
+                    </a>
+                    <div class="hidden md:block w-px h-6 bg-gray-600"></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-costa-green rounded-full animate-pulse"></div>
+                        <span class="text-costa-green text-sm font-medium">Lista de Avisos</span>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="{% url 'home' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10">
+                        Inicio
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10">
+                            Dashboard
+                        </a>
+                        <a href="{% url 'mis_avisos' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10">
+                            Mis Avisos
+                        </a>
+                        <a href="{% url 'crear_aviso' %}" class="bg-gradient-to-r from-costa-green to-costa-green-light text-white px-4 py-2 rounded-lg hover:from-costa-green-dark hover:to-costa-green transition-all text-sm font-medium transform hover:scale-105 shadow-lg">
+                            <i data-lucide="plus" class="inline h-4 w-4 mr-1"></i>
+                            Crear Aviso
+                        </a>
+                        <a href="{% url 'logout' %}" class="group text-gray-300 hover:text-white text-sm p-2 rounded-lg hover:bg-white/10 transition-all">
+                            <i data-lucide="log-out" class="h-4 w-4 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/10">
+                            Iniciar Sesión
+                        </a>
+                        <a href="{% url 'registro' %}" class="bg-gradient-to-r from-costa-green to-costa-green-light text-white px-4 py-2 rounded-lg hover:from-costa-green-dark hover:to-costa-green transition-all text-sm font-medium transform hover:scale-105 shadow-lg">
+                            Registrarse
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Menú móvil -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-300 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menú móvil contenido -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-costa-black/95 backdrop-blur-sm">
+                <a href="{% url 'home' %}" class="text-gray-300 hover:text-white block px-3 py-2 rounded-lg text-base font-medium hover:bg-white/10 transition-all">Inicio</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="text-gray-300 hover:text-white block px-3 py-2 rounded-lg text-base font-medium hover:bg-white/10 transition-all">Dashboard</a>
+                    <a href="{% url 'mis_avisos' %}" class="text-gray-300 hover:text-white block px-3 py-2 rounded-lg text-base font-medium hover:bg-white/10 transition-all">Mis Avisos</a>
+                    <a href="{% url 'crear_aviso' %}" class="text-gray-300 hover:text-white block px-3 py-2 rounded-lg text-base font-medium hover:bg-white/10 transition-all">Crear Aviso</a>
+                    <a href="{% url 'logout' %}" class="text-gray-300 hover:text-white block px-3 py-2 rounded-lg text-base font-medium hover:bg-white/10 transition-all">Salir</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="text-gray-300 hover:text-white block px-3 py-2 rounded-lg text-base font-medium hover:bg-white/10 transition-all">Iniciar Sesión</a>
+                    <a href="{% url 'registro' %}" class="text-gray-300 hover:text-white block px-3 py-2 rounded-lg text-base font-medium hover:bg-white/10 transition-all">Registrarse</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-xl animate-slide-up shadow-lg {% if message.tags == 'error' %}bg-red-900/20 text-red-300 border border-red-500/30{% elif message.tags == 'success' %}bg-green-900/20 text-green-300 border border-green-500/30{% elif message.tags == 'warning' %}bg-yellow-900/20 text-yellow-300 border border-yellow-500/30{% else %}bg-blue-900/20 text-blue-300 border border-blue-500/30{% endif %} backdrop-blur-sm">
+                    <div class="flex items-center">
+                        <i data-lucide="{% if message.tags == 'error' %}alert-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="h-5 w-5 mr-3 animate-pulse"></i>
+                        <span class="font-medium">{{ message }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header y Estadísticas Rápidas -->
+        <div class="bg-gradient-to-r from-costa-green to-costa-green-light rounded-2xl p-8 mb-8 text-white shadow-2xl animate-fade-in">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+                <div class="mb-6 lg:mb-0">
+                    <h1 class="text-3xl md:text-4xl font-bold mb-3 flex items-center">
+                        <i data-lucide="shield-alert" class="h-8 w-8 mr-3 animate-float"></i>
+                        Avisos de Seguridad
+                    </h1>
+                    <p class="text-green-100 text-lg mb-2">Mantente informado sobre la seguridad de nuestra comunidad</p>
+                    <p class="text-green-200 text-sm flex items-center">
+                        <i data-lucide="clock" class="h-4 w-4 mr-2 animate-pulse"></i>
+                        Actualizado en tiempo real
+                    </p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'crear_aviso' %}" class="group bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all font-medium text-center border border-white/30 transform hover:scale-105">
+                            <i data-lucide="plus" class="inline h-5 w-5 mr-2 group-hover:rotate-90 transition-transform"></i>
+                            Nuevo Aviso
+                        </a>
+                    {% else %}
+                        <a href="{% url 'registro' %}" class="group bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all font-medium text-center border border-white/30 transform hover:scale-105">
+                            <i data-lucide="user-plus" class="inline h-5 w-5 mr-2 group-hover:scale-110 transition-transform"></i>
+                            Únete Ahora
+                        </a>
+                    {% endif %}
+                    <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center min-w-[120px] border border-white/30">
+                        <div class="text-2xl font-bold">{{ avisos|length }}</div>
+                        <div class="text-green-100 text-sm">Avisos Activos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Búsqueda y Filtros -->
+        <div class="glassmorphism rounded-2xl shadow-2xl p-6 mb-8 animate-slide-up">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-lg font-semibold text-white flex items-center">
+                    <i data-lucide="filter" class="h-5 w-5 mr-2 text-costa-green"></i>
+                    Filtros de Búsqueda
+                </h2>
+                <button onclick="toggleFilters()" class="md:hidden text-costa-green p-2 rounded-lg hover:bg-costa-green/10 transition-all">
+                    <i data-lucide="chevron-down" class="h-5 w-5 transition-transform" id="filter-icon"></i>
+                </button>
+            </div>
+            
+            <form method="get" id="filter-form" class="space-y-4 md:space-y-0">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Búsqueda por texto -->
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2 flex items-center">
+                            <i data-lucide="search" class="h-4 w-4 mr-1 text-costa-green"></i>
+                            Buscar
+                        </label>
+                        <input type="text" name="q" class="form-input w-full" placeholder="Buscar avisos..." value="{{ request.GET.q|default:'' }}">
+                    </div>
+                    
+                    <!-- Filtro por tipo -->
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2 flex items-center">
+                            <i data-lucide="tag" class="h-4 w-4 mr-1 text-costa-green"></i>
+                            Tipo
+                        </label>
+                        <select name="tipo" class="form-select w-full">
+                            <option value="">Todos los tipos</option>
+                            <option value="robo" {% if request.GET.tipo == 'robo' %}selected{% endif %}>Robo</option>
+                            <option value="asalto" {% if request.GET.tipo == 'asalto' %}selected{% endif %}>Asalto</option>
+                            <option value="vandalismo" {% if request.GET.tipo == 'vandalismo' %}selected{% endif %}>Vandalismo</option>
+                            <option value="sospechoso" {% if request.GET.tipo == 'sospechoso' %}selected{% endif %}>Actividad Sospechosa</option>
+                            <option value="accidente" {% if request.GET.tipo == 'accidente' %}selected{% endif %}>Accidente</option>
+                            <option value="otro" {% if request.GET.tipo == 'otro' %}selected{% endif %}>Otro</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filtro por prioridad -->
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2 flex items-center">
+                            <i data-lucide="alert-triangle" class="h-4 w-4 mr-1 text-costa-green"></i>
+                            Prioridad
+                        </label>
+                        <select name="prioridad" class="form-select w-full">
+                            <option value="">Todas las prioridades</option>
+                            <option value="baja" {% if request.GET.prioridad == 'baja' %}selected{% endif %}>Baja</option>
+                            <option value="media" {% if request.GET.prioridad == 'media' %}selected{% endif %}>Media</option>
+                            <option value="alta" {% if request.GET.prioridad == 'alta' %}selected{% endif %}>Alta</option>
+                            <option value="urgente" {% if request.GET.prioridad == 'urgente' %}selected{% endif %}>Urgente</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filtro por estado -->
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2 flex items-center">
+                            <i data-lucide="activity" class="h-4 w-4 mr-1 text-costa-green"></i>
+                            Estado
+                        </label>
+                        <select name="status" class="form-select w-full">
+                            <option value="">Todos los estados</option>
+                            <option value="activo" {% if request.GET.status == 'activo' %}selected{% endif %}>Activo</option>
+                            <option value="en_proceso" {% if request.GET.status == 'en_proceso' %}selected{% endif %}>En Proceso</option>
+                            <option value="resuelto" {% if request.GET.status == 'resuelto' %}selected{% endif %}>Resuelto</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-costa-green/20">
+                    <button type="submit" class="group bg-gradient-to-r from-costa-green to-costa-green-light text-white px-6 py-3 rounded-xl hover:from-costa-green-dark hover:to-costa-green transition-all font-medium transform hover:scale-105 shadow-lg">
+                        <i data-lucide="search" class="inline h-4 w-4 mr-2 group-hover:scale-110 transition-transform"></i>
+                        Buscar
+                    </button>
+                    <a href="{% url 'lista_avisos' %}" class="group bg-gray-600/50 text-gray-300 px-6 py-3 rounded-xl hover:bg-gray-600/70 transition-all font-medium text-center border border-gray-500/50">
+                        <i data-lucide="x" class="inline h-4 w-4 mr-2 group-hover:rotate-90 transition-transform"></i>
+                        Limpiar
+                    </a>
+                    <div class="flex items-center text-sm text-gray-400 sm:ml-auto">
+                        <i data-lucide="info" class="h-4 w-4 mr-1"></i>
+                        Resultados se actualizan automáticamente
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista de Avisos -->
+        <div class="space-y-6">
+            {% for aviso in avisos %}
+            <div class="glassmorphism rounded-2xl shadow-2xl overflow-hidden card-hover group animate-slide-up" style="animation-delay: {{ forloop.counter0|add:2 }}00ms;">
+                <div class="p-6">
+                    <!-- Header del aviso -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start mb-4">
+                        <div class="flex flex-wrap items-center gap-3 mb-3 sm:mb-0">
+                            <!-- Badge de prioridad -->
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ aviso.get_prioridad_bg_color }} shadow-sm border border-opacity-30">
+                                <i data-lucide="{% if aviso.prioridad == 'urgente' %}alert-triangle{% elif aviso.prioridad == 'alta' %}alert-circle{% elif aviso.prioridad == 'media' %}info{% else %}check-circle{% endif %}" class="h-4 w-4 mr-1"></i>
+                                {{ aviso.get_prioridad_display }}
+                            </span>
+                            
+                            <!-- Badge de tipo -->
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-900/30 text-blue-300 border border-blue-500/30">
+                                <i data-lucide="tag" class="h-4 w-4 mr-1"></i>
+                                {{ aviso.get_tipo_display }}
+                            </span>
+                            
+                            <!-- Badge de estado -->
+                            {% if aviso.status == 'resuelto' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900/30 text-green-300 border border-green-500/30">
+                                    <i data-lucide="check-circle" class="h-4 w-4 mr-1"></i>
+                                    Resuelto
+                                </span>
+                            {% elif aviso.status == 'en_proceso' %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-900/30 text-yellow-300 border border-yellow-500/30">
+                                    <i data-lucide="clock" class="h-4 w-4 mr-1"></i>
+                                    En Proceso
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-sm text-gray-400 flex items-center bg-costa-gray-dark/50 px-3 py-1 rounded-full">
+                            <i data-lucide="clock" class="h-4 w-4 mr-1"></i>
+                            {{ aviso.tiempo_transcurrido }} atrás
+                        </div>
+                    </div>
+
+                    <!-- Título y descripción -->
+                    <h2 class="text-xl font-semibold text-white mb-3 group-hover:text-costa-green transition-colors">
+                        <a href="{% url 'aviso_detalle' aviso.pk %}" class="block flex items-center">
+                            {{ aviso.titulo }}
+                            <i data-lucide="external-link" class="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </a>
+                    </h2>
+
+                    <p class="text-gray-300 mb-6 leading-relaxed">{{ aviso.descripcion|truncatewords:30 }}</p>
+
+                    <!-- Información de ubicación y usuario -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="glassmorphism-light p-4 rounded-xl">
+                            <div class="flex items-start">
+                                <i data-lucide="map-pin" class="h-5 w-5 mr-3 text-red-400 mt-0.5"></i>
+                                <div>
+                                    <div class="font-medium text-white">{{ aviso.direccion }}</div>
+                                    <div class="text-gray-400 text-sm">{{ aviso.sector }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glassmorphism-light p-4 rounded-xl">
+                            <div class="flex items-start">
+                                {% if not aviso.es_anonimo %}
+                                    <i data-lucide="user" class="h-5 w-5 mr-3 text-costa-green mt-0.5"></i>
+                                    <div>
+                                        <div class="font-medium text-white">{{ aviso.usuario.get_full_name|default:aviso.usuario.username }}</div>
+                                        <div class="text-gray-400 text-sm">Reportado por</div>
+                                    </div>
+                                {% else %}
+                                    <i data-lucide="user-x" class="h-5 w-5 mr-3 text-gray-500 mt-0.5"></i>
+                                    <div>
+                                        <div class="font-medium text-gray-400">Reporte anónimo</div>
+                                        <div class="text-gray-500 text-sm">Usuario no visible</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Imagen si existe -->
+                    {% if aviso.imagen %}
+                    <div class="mb-6">
+                        <img src="{{ aviso.imagen.url }}" alt="Imagen del aviso" 
+                             class="w-full h-48 object-cover rounded-xl cursor-pointer hover:opacity-90 transition-all transform hover:scale-[1.02] shadow-lg border border-costa-green/20" 
+                             onclick="openImageModal('{{ aviso.imagen.url }}')">
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Footer con acciones -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-6 border-t border-costa-green/20">
+                        <div class="flex items-center space-x-4 text-sm text-gray-400 mb-3 sm:mb-0">
+                            {% if aviso.comentarios.count > 0 %}
+                                <span class="flex items-center bg-costa-gray-dark/50 px-3 py-1 rounded-full">
+                                    <i data-lucide="message-circle" class="h-4 w-4 mr-1"></i>
+                                    {{ aviso.comentarios.count }} comentario{{ aviso.comentarios.count|pluralize }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if aviso.verificado_por_admin %}
+                                <span class="flex items-center text-costa-green bg-green-900/20 px-3 py-1 rounded-full border border-green-500/30">
+                                    <i data-lucide="shield-check" class="h-4 w-4 mr-1"></i>
+                                    Verificado
+                                </span>
+                            {% endif %}
+                            
+                            <span class="flex items-center bg-costa-gray-dark/50 px-3 py-1 rounded-full">
+                                <i data-lucide="calendar" class="h-4 w-4 mr-1"></i>
+                                {{ aviso.fecha_creacion|date:"d/m/Y" }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            {% if user.is_authenticated and user == aviso.usuario %}
+                                <a href="{% url 'editar_aviso' aviso.pk %}" class="group bg-yellow-900/20 text-yellow-300 px-4 py-2 rounded-lg text-sm hover:bg-yellow-900/30 transition-all font-medium border border-yellow-500/30">
+                                    <i data-lucide="edit" class="inline h-4 w-4 mr-1 group-hover:scale-110 transition-transform"></i>
+                                    Editar
+                                </a>
+                            {% endif %}
+                            
+                            <a href="{% url 'aviso_detalle' aviso.pk %}" class="group bg-gradient-to-r from-costa-green to-costa-green-light text-white px-4 py-2 rounded-lg text-sm hover:from-costa-green-dark hover:to-costa-green transition-all font-medium transform hover:scale-105 shadow-lg">
+                                <i data-lucide="eye" class="inline h-4 w-4 mr-1 group-hover:scale-110 transition-transform"></i>
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Estado vacío -->
+            <div class="glassmorphism rounded-2xl shadow-2xl p-12 text-center animate-fade-in">
+                <div class="w-24 h-24 mx-auto mb-6 bg-costa-green/10 rounded-full flex items-center justify-center">
+                    <i data-lucide="search-x" class="h-12 w-12 text-costa-green"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-3">No se encontraron avisos</h3>
+                <p class="text-gray-400 mb-8 max-w-md mx-auto">
+                    {% if request.GET.q or request.GET.tipo or request.GET.prioridad or request.GET.status %}
+                        No hay avisos que coincidan con los filtros seleccionados.
+                    {% else %}
+                        Aún no hay avisos en el sistema.
+                    {% endif %}
+                </p>
+                
+                <div class="space-y-4">
+                    {% if request.GET.q or request.GET.tipo or request.GET.prioridad or request.GET.status %}
+                        <a href="{% url 'lista_avisos' %}" class="group inline-flex items-center px-6 py-3 bg-gray-600/50 text-gray-300 rounded-xl hover:bg-gray-600/70 transition-all border border-gray-500/50">
+                            <i data-lucide="x" class="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform"></i>
+                            Limpiar Filtros
+                        </a>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'crear_aviso' %}" class="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-costa-green to-costa-green-light text-white rounded-xl hover:from-costa-green-dark hover:to-costa-green transition-all font-medium transform hover:scale-105 shadow-xl">
+                            <i data-lucide="plus" class="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform"></i>
+                            Crear el Primer Aviso
+                        </a>
+                    {% else %}
+                        <div class="space-x-4">
+                            <a href="{% url 'login' %}" class="inline-flex items-center px-6 py-3 border border-costa-green/50 text-costa-green rounded-xl hover:bg-costa-green/10 transition-all">
+                                Iniciar Sesión
+                            </a>
+                            <a href="{% url 'registro' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-costa-green to-costa-green-light text-white rounded-xl hover:from-costa-green-dark hover:to-costa-green transition-all transform hover:scale-105 shadow-lg">
+                                Registrarse
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <div class="mt-8 flex justify-center animate-slide-up">
+            <nav class="inline-flex items-center space-x-1 glassmorphism rounded-xl p-2 shadow-xl">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                       class="p-3 text-sm text-gray-400 hover:text-white hover:bg-costa-green/20 rounded-lg transition-all">
+                        <i data-lucide="chevrons-left" class="h-4 w-4"></i>
+                    </a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                       class="p-3 text-sm text-gray-400 hover:text-white hover:bg-costa-green/20 rounded-lg transition-all">
+                        <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                    </a>
+                {% endif %}
+                
+                <span class="px-4 py-3 text-sm text-white bg-costa-green/20 rounded-lg border border-costa-green/30">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                       class="p-3 text-sm text-gray-400 hover:text-white hover:bg-costa-green/20 rounded-lg transition-all">
+                        <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                    </a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                       class="p-3 text-sm text-gray-400 hover:text-white hover:bg-costa-green/20 rounded-lg transition-all">
+                        <i data-lucide="chevrons-right" class="h-4 w-4"></i>
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+        
+        <!-- Info de paginación -->
+        <div class="mt-4 text-center text-sm text-gray-400">
+            Mostrando 
+            {% if page_obj.start_index %}{{ page_obj.start_index }}{% else %}0{% endif %} - 
+            {% if page_obj.end_index %}{{ page_obj.end_index }}{% else %}0{% endif %} 
+            de {{ page_obj.paginator.count }} avisos
+        </div>
+        {% endif %}
+
+        <!-- Acciones rápidas -->
+        <div class="mt-8 glassmorphism rounded-2xl p-6 shadow-2xl animate-slide-up">
+            <h3 class="text-lg font-semibold text-white mb-6 flex items-center">
+                <i data-lucide="zap" class="h-5 w-5 mr-2 text-costa-green"></i>
+                Acciones Rápidas
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'crear_aviso' %}" class="group glassmorphism-light p-4 rounded-xl hover:bg-costa-green/10 transition-all border border-costa-green/30 card-hover">
+                        <div class="flex items-center">
+                            <i data-lucide="plus-circle" class="h-6 w-6 text-costa-green mr-3 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-white font-medium">Reportar Incidente</span>
+                        </div>
+                    </a>
+                    <a href="{% url 'mis_avisos' %}" class="group glassmorphism-light p-4 rounded-xl hover:bg-costa-green/10 transition-all border border-costa-green/30 card-hover">
+                        <div class="flex items-center">
+                            <i data-lucide="user" class="h-6 w-6 text-costa-green mr-3 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-white font-medium">Ver Mis Avisos</span>
+                        </div>
+                    </a>
+                {% else %}
+                    <a href="{% url 'registro' %}" class="group glassmorphism-light p-4 rounded-xl hover:bg-costa-green/10 transition-all border border-costa-green/30 card-hover">
+                        <div class="flex items-center">
+                            <i data-lucide="user-plus" class="h-6 w-6 text-costa-green mr-3 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-white font-medium">Únete a la Comunidad</span>
+                        </div>
+                    </a>
+                {% endif %}
+                <a href="{% url 'lista_avisos' %}?prioridad=urgente" class="group glassmorphism-light p-4 rounded-xl hover:bg-red-500/10 transition-all border border-red-500/30 card-hover">
+                    <div class="flex items-center">
+                        <i data-lucide="alert-triangle" class="h-6 w-6 text-red-400 mr-3 group-hover:scale-110 transition-transform animate-pulse"></i>
+                        <span class="text-white font-medium">Solo Urgentes</span>
+                    </div>
+                </a>
+                <a href="{% url 'lista_avisos' %}?status=activo" class="group glassmorphism-light p-4 rounded-xl hover:bg-costa-green/10 transition-all border border-costa-green/30 card-hover">
+                    <div class="flex items-center">
+                        <i data-lucide="activity" class="h-6 w-6 text-costa-green mr-3 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-white font-medium">Solo Activos</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para imagen -->
+    <div id="imageModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4" onclick="closeImageModal()">
+        <div class="max-w-full max-h-full relative">
+            <img id="modalImage" src="" alt="Imagen ampliada" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl">
+            <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 bg-black/50 rounded-full p-3 backdrop-blur-sm transition-all transform hover:scale-110">
+                <i data-lucide="x" class="h-6 w-6"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar iconos Lucide
+        lucide.createIcons();
+        
+        // Menú móvil
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            const button = this;
+            const icon = button.querySelector('i');
+            
+            menu.classList.toggle('hidden');
+            
+            // Cambiar icono
+            if (menu.classList.contains('hidden')) {
+                icon.setAttribute('data-lucide', 'menu');
+            } else {
+                icon.setAttribute('data-lucide', 'x');
+            }
+            lucide.createIcons();
+        });
+
+        // Toggle filtros en móvil
+        function toggleFilters() {
+            const form = document.getElementById('filter-form');
+            const icon = document.getElementById('filter-icon');
+            
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                form.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Modal de imagen
+        function openImageModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImageModal();
+            }
+        });
+
+        // Auto-submit del formulario de filtros (opcional)
+        const filterInputs = document.querySelectorAll('#filter-form select, #filter-form input');
+        filterInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Opcional: auto-submit después de un delay
+                // setTimeout(() => document.getElementById('filter-form').submit(), 500);
+            });
+        });
+
+        // Highlight del término de búsqueda
+        const searchTerm = '{{ request.GET.q|escapejs }}';
+        if (searchTerm) {
+            const titles = document.querySelectorAll('h2 a');
+            titles.forEach(title => {
+                const text = title.textContent;
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                title.innerHTML = text.replace(regex, '<mark>$1</mark>');
+            });
+        }
+
+        // Animación de entrada para las cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observar elementos para animación
+        document.querySelectorAll('.animate-slide-up').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            observer.observe(el);
+        });
+
+        // Hover effects mejorados
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px) scale(1.01)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Efectos de partículas sutiles en el fondo (opcional)
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.width = '2px';
+            particle.style.height = '2px';
+            particle.style.background = '#10B981';
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '1';
+            particle.style.opacity = '0.3';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.top = '100vh';
+            particle.style.animation = 'particleFloat 8s linear infinite';
+            
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 8000);
+        }
+
+        // Crear partículas ocasionalmente
+        setInterval(createParticle, 3000);
+
+        // CSS para animación de partículas
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes particleFloat {
+                to {
+                    transform: translateY(-100vh) translateX(${Math.random() * 200 - 100}px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

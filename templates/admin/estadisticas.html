@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'costa-green': '#10B981',
+                        'costa-green-dark': '#059669',
+                        'costa-green-light': '#34D399',
+                        'costa-black': '#111827',
+                        'costa-gray-dark': '#1F2937',
+                        'costa-gray-light': '#F9FAFB',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #111827, #1F2937, #111827);
+        }
+        .glassmorphism {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .glassmorphism-card {
+            background: rgba(31, 41, 55, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #10B981, #34D399);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 z-50 w-64 glassmorphism shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="sidebar">
+        <div class="flex items-center justify-center h-16 border-b border-costa-green/20">
+            <div class="flex items-center">
+                <div class="bg-gradient-to-r from-costa-green to-costa-green-light p-2 rounded-lg mr-3">
+                    <i data-lucide="shield-check" class="h-6 w-6 text-white"></i>
+                </div>
+                <span class="text-xl font-bold text-white">Admin Panel</span>
+            </div>
+        </div>
+        
+        <nav class="mt-8">
+            <div class="px-4 space-y-2">
+                <a href="{% url 'admin_dashboard' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="layout-dashboard" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Dashboard
+                </a>
+                <a href="{% url 'admin_avisos_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="alert-triangle" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Avisos
+                </a>
+                <a href="{% url 'admin_usuarios_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="users" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Usuarios
+                </a>
+                <a href="{% url 'admin_comentarios_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="message-circle" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Comentarios
+                </a>
+                <a href="{% url 'admin_estadisticas' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-white bg-costa-green/20 border border-costa-green/30">
+                    <i data-lucide="bar-chart-3" class="mr-3 h-5 w-5 text-costa-green group-hover:scale-110 transition-transform"></i>
+                    Estadísticas
+                </a>
+            </div>
+            
+            <div class="mt-8 px-4">
+                <hr class="border-costa-green/20">
+                <div class="mt-4 space-y-2">
+                    <a href="{% url 'home' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                        <i data-lucide="home" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                        Ver Sitio Web
+                    </a>
+                    <a href="{% url 'logout' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300">
+                        <i data-lucide="log-out" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                        Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:pl-64 flex flex-col min-h-screen">
+        <!-- Top Bar -->
+        <header class="glassmorphism shadow-xl">
+            <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center">
+                    <button class="lg:hidden p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors" onclick="toggleSidebar()">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
+                    </button>
+                    <h1 class="ml-2 lg:ml-0 text-xl font-semibold text-white">Estadísticas Avanzadas</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-300">
+                        <span class="font-medium text-white">{{ user.get_full_name|default:user.username }}</span>
+                        <div class="text-xs text-costa-green">Administrador</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8">
+            <!-- Métricas Generales -->
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+                <div class="glassmorphism-card rounded-2xl p-6 shadow-2xl">
+                    <div class="flex items-center">
+                        <div class="bg-costa-green/20 p-3 rounded-lg">
+                            <i data-lucide="alert-triangle" class="h-6 w-6 text-costa-green"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Total Avisos</p>
+                            <p class="text-2xl font-bold text-white">{{ total_avisos }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glassmorphism-card rounded-2xl p-6 shadow-2xl">
+                    <div class="flex items-center">
+                        <div class="bg-blue-500/20 p-3 rounded-lg">
+                            <i data-lucide="users" class="h-6 w-6 text-blue-400"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Total Usuarios</p>
+                            <p class="text-2xl font-bold text-white">{{ total_usuarios }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glassmorphism-card rounded-2xl p-6 shadow-2xl">
+                    <div class="flex items-center">
+                        <div class="bg-purple-500/20 p-3 rounded-lg">
+                            <i data-lucide="message-circle" class="h-6 w-6 text-purple-400"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Comentarios</p>
+                            <p class="text-2xl font-bold text-white">{{ total_comentarios }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glassmorphism-card rounded-2xl p-6 shadow-2xl">
+                    <div class="flex items-center">
+                        <div class="bg-green-500/20 p-3 rounded-lg">
+                            <i data-lucide="trending-up" class="h-6 w-6 text-green-400"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Avisos (30d)</p>
+                            <p class="text-2xl font-bold text-white">{{ avisos_recientes }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glassmorphism-card rounded-2xl p-6 shadow-2xl">
+                    <div class="flex items-center">
+                        <div class="bg-yellow-500/20 p-3 rounded-lg">
+                            <i data-lucide="user-plus" class="h-6 w-6 text-yellow-400"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Usuarios (30d)</p>
+                            <p class="text-2xl font-bold text-white">{{ usuarios_recientes }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glassmorphism-card rounded-2xl p-6 shadow-2xl">
+                    <div class="flex items-center">
+                        <div class="bg-orange-500/20 p-3 rounded-lg">
+                            <i data-lucide="message-square" class="h-6 w-6 text-orange-400"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Comentarios (30d)</p>
+                            <p class="text-2xl font-bold text-white">{{ comentarios_recientes }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles de Tiempo -->
+            <div class="glassmorphism-card rounded-2xl p-6 mb-8 shadow-2xl">
+                <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
+                    <i data-lucide="calendar" class="h-5 w-5 mr-2 text-costa-green"></i>
+                    Período de Análisis
+                </h2>
+                
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="cambiarPeriodo('7d')" class="btn-gradient text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                        Últimos 7 días
+                    </button>
+                    <button onclick="cambiarPeriodo('30d')" class="glassmorphism border border-gray-600 text-gray-300 px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:text-white">
+                        Últimos 30 días
+                    </button>
+                    <button onclick="cambiarPeriodo('12m')" class="glassmorphism border border-gray-600 text-gray-300 px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:text-white">
+                        Últimos 12 meses
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gráficos Principales -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Gráfico de Avisos por Mes -->
+                <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-costa-green/20">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="trending-up" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Avisos por Mes
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-80">
+                            <canvas id="avisosChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Usuarios por Mes -->
+                <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-costa-green/20">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="users" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Registros por Mes
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-80">
+                            <canvas id="usuariosChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas por Categorías -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Estados de Avisos -->
+                <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-costa-green/20">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="pie-chart" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Estados de Avisos
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-60">
+                            <canvas id="estadosChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prioridades -->
+                <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-costa-green/20">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="alert-triangle" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Prioridades
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-60">
+                            <canvas id="prioridadesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipos de Avisos -->
+                <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-costa-green/20">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="tag" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Tipos de Avisos
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-60">
+                            <canvas id="tiposChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métricas Adicionales -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Actividad por Hora -->
+                <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-costa-green/20">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="clock" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Actividad por Hora del Día
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="h-80">
+                            <canvas id="actividadChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Usuarios Activos -->
+                <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-costa-green/20">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="trophy" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Usuarios Más Activos
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4" id="topUsuarios">
+                            <!-- Se cargará dinámicamente -->
+                            <div class="text-center py-8">
+                                <i data-lucide="loader" class="h-8 w-8 mx-auto mb-4 text-costa-green animate-spin"></i>
+                                <p class="text-gray-400">Cargando estadísticas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Exportación -->
+            <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden mt-8">
+                <div class="px-6 py-4 border-b border-costa-green/20">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-white flex items-center">
+                            <i data-lucide="download" class="h-5 w-5 mr-2 text-costa-green"></i>
+                            Exportar Datos
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button onclick="exportarCSV()" class="btn-gradient text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                                <i data-lucide="file-text" class="h-4 w-4 mr-2 inline"></i>
+                                Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-400 text-sm">
+                        Descarga un reporte completo de las estadísticas del sistema en formato CSV para análisis externos.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Overlay para mobile sidebar -->
+    <div class="fixed inset-0 z-40 bg-black bg-opacity-50 hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <script>
+        lucide.createIcons();
+
+        // Configuración global de Chart.js
+        Chart.defaults.color = '#9CA3AF';
+        Chart.defaults.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+        Chart.defaults.borderColor = 'rgba(16, 185, 129, 0.3)';
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Datos reales desde Django
+        const avisosData = {{ avisos_por_mes|safe }};
+        const usuariosData = {{ usuarios_por_mes|safe }};
+        const estadosData = {{ estados_avisos|safe }};
+        const prioridadesData = {{ prioridades_avisos|safe }};
+        const tiposData = {{ tipos_avisos|safe }};
+        const actividadData = {{ actividad_por_hora|safe }};
+        const topUsuariosData = {{ top_usuarios|safe }};
+
+        // Gráfico de Avisos por Mes
+        const avisosCtx = document.getElementById('avisosChart').getContext('2d');
+        const avisosChart = new Chart(avisosCtx, {
+            type: 'line',
+            data: {
+                labels: avisosData.map(item => item.mes),
+                datasets: [{
+                    label: 'Avisos Creados',
+                    data: avisosData.map(item => item.count),
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10B981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Usuarios por Mes
+        const usuariosCtx = document.getElementById('usuariosChart').getContext('2d');
+        const usuariosChart = new Chart(usuariosCtx, {
+            type: 'bar',
+            data: {
+                labels: usuariosData.map(item => item.mes),
+                datasets: [{
+                    label: 'Nuevos Usuarios',
+                    data: usuariosData.map(item => item.count),
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: '#10B981',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Estados (datos reales)
+        const estadosCtx = document.getElementById('estadosChart').getContext('2d');
+        const estadosChart = new Chart(estadosCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Activos', 'En Proceso', 'Resueltos'],
+                datasets: [{
+                    data: [estadosData.activos, estadosData.en_proceso, estadosData.resueltos],
+                    backgroundColor: [
+                        '#EF4444',
+                        '#F59E0B',
+                        '#10B981'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Prioridades (datos reales)
+        const prioridadesCtx = document.getElementById('prioridadesChart').getContext('2d');
+        const prioridadesChart = new Chart(prioridadesCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['Urgente', 'Alta', 'Media', 'Baja'],
+                datasets: [{
+                    data: [prioridadesData.urgente, prioridadesData.alta, prioridadesData.media, prioridadesData.baja],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(107, 114, 128, 0.8)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Tipos (datos reales)
+        const tiposCtx = document.getElementById('tiposChart').getContext('2d');
+        const tiposChart = new Chart(tiposCtx, {
+            type: 'bar',
+            data: {
+                labels: tiposData.map(item => {
+                    // Convertir nombre del tipo a display name
+                    const displayNames = {
+                        'robo': 'Robo',
+                        'vandalismo': 'Vandalismo',
+                        'ruido': 'Ruido',
+                        'iluminacion': 'Iluminación',
+                        'basura': 'Basura',
+                        'trafico': 'Tráfico',
+                        'drogas': 'Drogas',
+                        'asalto': 'Asalto',
+                        'otro': 'Otro'
+                    };
+                    return displayNames[item.nombre] || item.nombre;
+                }),
+                datasets: [{
+                    data: tiposData.map(item => item.total),
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: '#10B981',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Actividad por Hora (datos reales)
+        const actividadCtx = document.getElementById('actividadChart').getContext('2d');
+        const actividadChart = new Chart(actividadCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                datasets: [{
+                    label: 'Avisos Creados',
+                    data: actividadData,
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Cargar Top Usuarios (datos reales)
+        function cargarTopUsuarios() {
+            const container = document.getElementById('topUsuarios');
+            
+            if (topUsuariosData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <i data-lucide="users" class="h-12 w-12 mx-auto mb-4 text-gray-500 opacity-50"></i>
+                        <p class="text-gray-400">No hay usuarios activos aún</p>
+                        <p class="text-sm text-gray-500 mt-2">Los usuarios aparecerán aquí cuando creen avisos o comentarios</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = topUsuariosData.map((user, index) => `
+                <div class="flex items-center justify-between p-4 glassmorphism rounded-lg border border-gray-700">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full btn-gradient flex items-center justify-center text-white font-bold text-sm">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-white">${user.get_full_name || user.username}</p>
+                            <p class="text-xs text-gray-400">${user.total_avisos} avisos • ${user.total_comentarios} comentarios</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-costa-green">${user.total_actividad}</div>
+                        <div class="text-xs text-gray-400">total</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Funciones de control
+        function cambiarPeriodo(periodo) {
+            // Implementar cambio de período
+            console.log('Cambiar período a:', periodo);
+            // Aquí se harían nuevas consultas al backend
+        }
+
+        function exportarCSV() {
+            // Crear datos reales para exportar
+            const fechaActual = new Date().toISOString().split('T')[0];
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Reporte de Estadisticas - CostaVerde\n";
+            csvContent += `Fecha de Generacion,${fechaActual}\n\n`;
+            
+            // Estadísticas generales
+            csvContent += "ESTADISTICAS GENERALES\n";
+            csvContent += "Metrica,Valor\n";
+            csvContent += `Total Avisos,{{ total_avisos }}\n`;
+            csvContent += `Total Usuarios,{{ total_usuarios }}\n`;
+            csvContent += `Total Comentarios,{{ total_comentarios }}\n`;
+            csvContent += `Avisos Últimos 30 días,{{ avisos_recientes }}\n`;
+            csvContent += `Usuarios Últimos 30 días,{{ usuarios_recientes }}\n`;
+            csvContent += `Comentarios Últimos 30 días,{{ comentarios_recientes }}\n\n`;
+            
+            // Estados de avisos
+            csvContent += "ESTADOS DE AVISOS\n";
+            csvContent += "Estado,Cantidad\n";
+            csvContent += `Activos,${estadosData.activos}\n`;
+            csvContent += `En Proceso,${estadosData.en_proceso}\n`;
+            csvContent += `Resueltos,${estadosData.resueltos}\n\n`;
+            
+            // Prioridades
+            csvContent += "PRIORIDADES DE AVISOS\n";
+            csvContent += "Prioridad,Cantidad\n";
+            csvContent += `Urgente,${prioridadesData.urgente}\n`;
+            csvContent += `Alta,${prioridadesData.alta}\n`;
+            csvContent += `Media,${prioridadesData.media}\n`;
+            csvContent += `Baja,${prioridadesData.baja}\n\n`;
+            
+            // Tipos de avisos
+            csvContent += "TIPOS DE AVISOS\n";
+            csvContent += "Tipo,Cantidad\n";
+            tiposData.forEach(tipo => {
+                const displayNames = {
+                    'robo': 'Robo',
+                    'vandalismo': 'Vandalismo',
+                    'ruido': 'Ruido',
+                    'iluminacion': 'Iluminación',
+                    'basura': 'Basura',
+                    'trafico': 'Tráfico',
+                    'drogas': 'Drogas',
+                    'asalto': 'Asalto',
+                    'otro': 'Otro'
+                };
+                const nombre = displayNames[tipo.nombre] || tipo.nombre;
+                csvContent += `${nombre},${tipo.total}\n`;
+            });
+            
+            // Crear y descargar archivo
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `estadisticas_costaverde_${fechaActual}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Inicializar con datos reales
+        cargarTopUsuarios();
+    </script>
+</body>
+</html>

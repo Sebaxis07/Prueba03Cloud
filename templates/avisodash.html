@@ -1,0 +1,386 @@
+<!-- templates/avisos/dashboard.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Costa Laguna Segura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'costa-green': '#10B981',
+                        'costa-green-dark': '#059669',
+                        'costa-green-light': '#34D399',
+                        'costa-black': '#111827',
+                        'costa-gray-dark': '#1F2937',
+                        'costa-gray-light': '#F9FAFB',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #111827, #1F2937);
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -12px rgba(16, 185, 129, 0.15);
+        }
+        .glassmorphism {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-costa-black via-costa-gray-dark to-black min-h-screen">
+    <!-- Navegación -->
+    <nav class="gradient-bg backdrop-blur-sm shadow-2xl sticky top-0 z-50 border-b border-costa-green/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center animate-fade-in">
+                        <div class="relative">
+                            <i data-lucide="shield-alert" class="h-8 w-8 text-costa-green mr-3 animate-pulse-slow"></i>
+                            <div class="absolute -top-1 -right-1 w-3 h-3 bg-costa-green rounded-full animate-ping"></div>
+                        </div>
+                        <span class="text-white text-xl font-bold bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
+                            Costa Laguna Segura
+                        </span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-costa-green rounded-full animate-pulse"></div>
+                        <span class="text-gray-300">Hola, <span class="text-costa-green font-semibold">{{ user.first_name|default:user.username }}</span></span>
+                    </div>
+                    <a href="{% url 'crear_aviso' %}" class="bg-gradient-to-r from-costa-green to-costa-green-light text-white px-6 py-2 rounded-lg hover:from-costa-green-dark hover:to-costa-green transition-all transform hover:scale-105 shadow-lg font-medium">
+                        <i data-lucide="plus" class="inline h-4 w-4 mr-2"></i>
+                        Crear Aviso
+                    </a>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="group text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-all">
+                            <i data-lucide="log-out" class="inline h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform"></i>
+                            Salir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-xl animate-slide-up shadow-lg {% if message.tags == 'error' %}bg-red-900/20 text-red-300 border border-red-500/30{% else %}bg-green-900/20 text-green-300 border border-green-500/30{% endif %} backdrop-blur-sm">
+                    <div class="flex items-center">
+                        <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle{% endif %}" class="h-5 w-5 mr-3 animate-pulse"></i>
+                        <span class="font-medium">{{ message }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Contenido principal -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-8 animate-fade-in">
+            <div class="flex items-center mb-4">
+                <div class="w-1 h-12 bg-costa-green rounded-full mr-4"></div>
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-white">Dashboard</h1>
+                    <p class="text-gray-300">Panel de control de Costa Laguna Segura</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <a href="{% url 'crear_aviso' %}" class="group card-hover glassmorphism p-6 rounded-xl border-l-4 border-costa-green animate-slide-up">
+                <div class="flex items-center">
+                    <div class="p-3 bg-costa-green/10 rounded-full group-hover:bg-costa-green group-hover:scale-110 transition-all">
+                        <i data-lucide="plus-circle" class="h-8 w-8 text-costa-green group-hover:text-white transition-colors"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-white group-hover:text-costa-green transition-colors">Crear Aviso</h3>
+                        <p class="text-sm text-gray-400">Reportar incidente</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'lista_avisos' %}" class="group card-hover glassmorphism p-6 rounded-xl border-l-4 border-green-400 animate-slide-up" style="animation-delay: 0.1s;">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-400/10 rounded-full group-hover:bg-green-400 group-hover:scale-110 transition-all">
+                        <i data-lucide="list" class="h-8 w-8 text-green-400 group-hover:text-white transition-colors"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-white group-hover:text-green-400 transition-colors">Ver Avisos</h3>
+                        <p class="text-sm text-gray-400">Todos los avisos</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'mis_avisos' %}" class="group card-hover glassmorphism p-6 rounded-xl border-l-4 border-yellow-400 animate-slide-up" style="animation-delay: 0.2s;">
+                <div class="flex items-center">
+                    <div class="p-3 bg-yellow-400/10 rounded-full group-hover:bg-yellow-400 group-hover:scale-110 transition-all">
+                        <i data-lucide="user" class="h-8 w-8 text-yellow-400 group-hover:text-white transition-colors"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-white group-hover:text-yellow-400 transition-colors">Mis Avisos</h3>
+                        <p class="text-sm text-gray-400">{{ mis_avisos.count }} avisos</p>
+                    </div>
+                </div>
+            </a>
+            
+            <div class="card-hover glassmorphism p-6 rounded-xl border-l-4 border-red-400 animate-slide-up" style="animation-delay: 0.3s;">
+                <div class="flex items-center">
+                    <div class="p-3 bg-red-400/10 rounded-full">
+                        <i data-lucide="alert-triangle" class="h-8 w-8 text-red-400 animate-pulse"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-white">Urgentes</h3>
+                        <p class="text-sm text-gray-400">En tu sector</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Mis Avisos Recientes -->
+            <div class="glassmorphism rounded-xl shadow-2xl animate-slide-up">
+                <div class="p-6 border-b border-costa-green/20">
+                    <div class="flex items-center">
+                        <i data-lucide="clock" class="h-6 w-6 text-costa-green mr-3"></i>
+                        <h2 class="text-xl font-semibold text-white">Mis Avisos Recientes</h2>
+                    </div>
+                </div>
+                <div class="p-6">
+                    {% if mis_avisos %}
+                        <div class="space-y-4">
+                            {% for aviso in mis_avisos %}
+                            <div class="group bg-costa-gray-dark/50 rounded-lg p-4 border-l-4 border-{{ aviso.get_prioridad_color }}-400 hover:bg-costa-gray-dark/70 transition-all cursor-pointer">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h3 class="font-medium text-white group-hover:text-costa-green transition-colors">
+                                            <a href="{% url 'aviso_detalle' aviso.pk %}" class="flex items-center">
+                                                {{ aviso.titulo }}
+                                                <i data-lucide="external-link" class="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                            </a>
+                                        </h3>
+                                        <div class="flex items-center mt-2 space-x-4">
+                                            <p class="text-sm text-gray-400 flex items-center">
+                                                <i data-lucide="map-pin" class="h-3 w-3 mr-1"></i>
+                                                {{ aviso.sector }}
+                                            </p>
+                                            <p class="text-xs text-gray-500 flex items-center">
+                                                <i data-lucide="clock" class="h-3 w-3 mr-1"></i>
+                                                {{ aviso.tiempo_transcurrido }} atrás
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs rounded-full {{ aviso.get_prioridad_bg_color }} font-medium border border-opacity-30">
+                                        {{ aviso.get_prioridad_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-costa-green/20">
+                            <a href="{% url 'mis_avisos' %}" class="group inline-flex items-center text-costa-green hover:text-costa-green-light font-medium text-sm">
+                                Ver todos mis avisos
+                                <i data-lucide="arrow-right" class="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-12">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-costa-green/10 rounded-full flex items-center justify-center">
+                                <i data-lucide="plus-circle" class="h-8 w-8 text-costa-green"></i>
+                            </div>
+                            <p class="text-gray-400 mb-6">No has creado avisos aún</p>
+                            <a href="{% url 'crear_aviso' %}" class="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-costa-green to-costa-green-light text-white rounded-lg hover:from-costa-green-dark hover:to-costa-green transition-all transform hover:scale-105 shadow-lg">
+                                <i data-lucide="plus" class="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform"></i>
+                                Crear mi primer aviso
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Avisos por Tipo -->
+            <div class="glassmorphism rounded-xl shadow-2xl animate-slide-up" style="animation-delay: 0.2s;">
+                <div class="p-6 border-b border-costa-green/20">
+                    <div class="flex items-center">
+                        <i data-lucide="bar-chart-3" class="h-6 w-6 text-costa-green mr-3"></i>
+                        <h2 class="text-xl font-semibold text-white">Avisos por Tipo</h2>
+                    </div>
+                </div>
+                <div class="p-6">
+                    {% if avisos_por_tipo %}
+                        <div class="space-y-4">
+                            {% for tipo in avisos_por_tipo %}
+                            <div class="flex justify-between items-center group">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 bg-costa-green rounded-full mr-3 group-hover:scale-125 transition-transform"></div>
+                                    <span class="text-sm font-medium text-white group-hover:text-costa-green transition-colors">{{ tipo.get_nombre_display }}</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-12 h-2 bg-costa-gray-dark rounded-full overflow-hidden">
+                                        <div class="h-full bg-costa-green rounded-full transition-all" style="width: {{ tipo.porcentaje|default:0 }}%"></div>
+                                    </div>
+                                    <span class="bg-costa-green/20 text-costa-green px-3 py-1 rounded-full text-sm font-medium border border-costa-green/30">{{ tipo.total }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-12">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-gray-600/20 rounded-full flex items-center justify-center">
+                                <i data-lucide="bar-chart-3" class="h-8 w-8 text-gray-500"></i>
+                            </div>
+                            <p class="text-gray-400">No hay datos disponibles</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Avisos de Mi Sector -->
+        {% if avisos_mi_sector %}
+        <div class="mt-8 glassmorphism rounded-xl shadow-2xl animate-slide-up" style="animation-delay: 0.4s;">
+            <div class="p-6 border-b border-red-500/30">
+                <div class="flex items-center">
+                    <i data-lucide="map-pin" class="h-6 w-6 text-red-400 mr-3 animate-pulse"></i>
+                    <h2 class="text-xl font-semibold text-white">Avisos Importantes en Tu Sector</h2>
+                    <span class="ml-3 px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">URGENTE</span>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    {% for aviso in avisos_mi_sector %}
+                    <div class="group bg-gradient-to-r from-red-900/20 to-red-800/20 border border-red-500/30 rounded-xl p-6 hover:from-red-900/30 hover:to-red-800/30 transition-all">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-2 h-2 bg-red-400 rounded-full mr-2 animate-pulse"></div>
+                                    <h3 class="font-medium text-white group-hover:text-red-300 transition-colors">
+                                        <a href="{% url 'aviso_detalle' aviso.pk %}" class="flex items-center">
+                                            {{ aviso.titulo }}
+                                            <i data-lucide="external-link" class="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                        </a>
+                                    </h3>
+                                </div>
+                                <p class="text-sm text-gray-300 mb-3 leading-relaxed">{{ aviso.descripcion|truncatewords:15 }}</p>
+                                <p class="text-xs text-gray-400 flex items-center">
+                                    <i data-lucide="clock" class="h-3 w-3 mr-1"></i>
+                                    {{ aviso.tiempo_transcurrido }} atrás
+                                </p>
+                            </div>
+                            <span class="px-3 py-1 text-xs rounded-full bg-red-500/20 text-red-300 font-medium border border-red-500/30">
+                                {{ aviso.get_prioridad_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        // Animaciones en scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observar elementos para animación
+        document.querySelectorAll('.animate-slide-up').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            observer.observe(el);
+        });
+
+        // Hover effects mejorados
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px) scale(1.01)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Efecto de typing para el título
+        const title = document.querySelector('h1');
+        if (title) {
+            const text = title.textContent;
+            title.textContent = '';
+            let i = 0;
+            const typeWriter = () => {
+                if (i < text.length) {
+                    title.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                }
+            };
+            setTimeout(typeWriter, 500);
+        }
+
+        // Animación de progreso para las barras de tipo
+        setTimeout(() => {
+            document.querySelectorAll('[style*="width:"]').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Comentarios - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'costa-green': '#10B981',
+                        'costa-green-dark': '#059669',
+                        'costa-green-light': '#34D399',
+                        'costa-black': '#111827',
+                        'costa-gray-dark': '#1F2937',
+                        'costa-gray-light': '#F9FAFB',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #111827, #1F2937, #111827);
+        }
+        .glassmorphism {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .glassmorphism-card {
+            background: rgba(31, 41, 55, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #10B981, #34D399);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 z-50 w-64 glassmorphism shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="sidebar">
+        <div class="flex items-center justify-center h-16 border-b border-costa-green/20">
+            <div class="flex items-center">
+                <div class="bg-gradient-to-r from-costa-green to-costa-green-light p-2 rounded-lg mr-3">
+                    <i data-lucide="shield-check" class="h-6 w-6 text-white"></i>
+                </div>
+                <span class="text-xl font-bold text-white">Admin Panel</span>
+            </div>
+        </div>
+        
+        <nav class="mt-8">
+            <div class="px-4 space-y-2">
+                <a href="{% url 'admin_dashboard' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="layout-dashboard" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Dashboard
+                </a>
+                <a href="{% url 'admin_avisos_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="alert-triangle" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Avisos
+                </a>
+                <a href="{% url 'admin_usuarios_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="users" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Usuarios
+                </a>
+                <a href="{% url 'admin_comentarios_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-white bg-costa-green/20 border border-costa-green/30">
+                    <i data-lucide="message-circle" class="mr-3 h-5 w-5 text-costa-green group-hover:scale-110 transition-transform"></i>
+                    Comentarios
+                </a>
+                <a href="{% url 'admin_estadisticas' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                    <i data-lucide="bar-chart-3" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                    Estadísticas
+                </a>
+            </div>
+            
+            <div class="mt-8 px-4">
+                <hr class="border-costa-green/20">
+                <div class="mt-4 space-y-2">
+                    <a href="{% url 'home' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
+                        <i data-lucide="home" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                        Ver Sitio Web
+                    </a>
+                    <a href="{% url 'logout' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300">
+                        <i data-lucide="log-out" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
+                        Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:pl-64 flex flex-col min-h-screen">
+        <!-- Top Bar -->
+        <header class="glassmorphism shadow-xl">
+            <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center">
+                    <button class="lg:hidden p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors" onclick="toggleSidebar()">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
+                    </button>
+                    <h1 class="ml-2 lg:ml-0 text-xl font-semibold text-white">Gestión de Comentarios</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-300">
+                        <span class="font-medium text-white">{{ user.get_full_name|default:user.username }}</span>
+                        <div class="text-xs text-costa-green">Administrador</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8">
+            <!-- Filtros -->
+            <div class="glassmorphism-card rounded-2xl p-6 mb-8 shadow-2xl">
+                <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
+                    <i data-lucide="filter" class="h-5 w-5 mr-2 text-costa-green"></i>
+                    Filtros de Búsqueda
+                </h2>
+                
+                <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <input type="text" name="search" placeholder="Buscar en comentarios..." value="{{ current_filters.search|default:'' }}" 
+                               class="w-full px-4 py-2 bg-costa-gray-dark border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-costa-green focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <select name="activo" class="w-full px-4 py-2 bg-costa-gray-dark border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-costa-green focus:border-transparent">
+                            <option value="">Todos los comentarios</option>
+                            <option value="true" {% if current_filters.activo == 'true' %}selected{% endif %}>Solo Activos</option>
+                            <option value="false" {% if current_filters.activo == 'false' %}selected{% endif %}>Solo Inactivos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button type="submit" class="btn-gradient text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                            <i data-lucide="search" class="h-4 w-4 mr-2 inline"></i>
+                            Filtrar
+                        </button>
+                        <a href="{% url 'admin_comentarios_list' %}" class="glassmorphism border border-gray-600 text-gray-300 px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:text-white">
+                            <i data-lucide="x" class="h-4 w-4 mr-2 inline"></i>
+                            Limpiar
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de Comentarios -->
+            <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-costa-green/20">
+                    <h2 class="text-lg font-semibold text-white flex items-center">
+                        <i data-lucide="message-circle" class="h-5 w-5 mr-2 text-costa-green"></i>
+                        Comentarios ({{ comentarios|length }} resultados)
+                    </h2>
+                </div>
+                
+                <div class="divide-y divide-gray-700">
+                    {% for comentario in comentarios %}
+                    <div class="p-6 hover:bg-white/5 transition-colors duration-300">
+                        <div class="flex items-start space-x-4">
+                            <!-- Avatar del usuario -->
+                            <div class="flex-shrink-0">
+                                {% if comentario.usuario.perfilusuario.foto_perfil %}
+                                    <img class="h-10 w-10 rounded-full object-cover border-2 border-costa-green/50" src="{{ comentario.usuario.perfilusuario.foto_perfil.url }}" alt="Foto de perfil">
+                                {% else %}
+                                    <div class="h-10 w-10 rounded-full btn-gradient flex items-center justify-center">
+                                        <i data-lucide="user" class="h-5 w-5 text-white"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Contenido del comentario -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-2">
+                                        <h4 class="text-sm font-medium text-white">{{ comentario.usuario.get_full_name|default:comentario.usuario.username }}</h4>
+                                        <span class="text-xs text-gray-400">•</span>
+                                        <span class="text-xs text-gray-400">{{ comentario.fecha_creacion|timesince }} atrás</span>
+                                        {% if not comentario.activo %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-400">
+                                                Inactivo
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Acciones -->
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="toggleComentario({{ comentario.id }})" class="{% if comentario.activo %}text-red-400 hover:text-red-300{% else %}text-green-400 hover:text-green-300{% endif %} transition-colors" title="{% if comentario.activo %}Desactivar{% else %}Activar{% endif %}">
+                                            <i data-lucide="{% if comentario.activo %}eye-off{% else %}eye{% endif %}" class="h-4 w-4"></i>
+                                        </button>
+                                        
+                                        <a href="{% url 'aviso_detalle' comentario.aviso.id %}" class="text-costa-green hover:text-costa-green-light transition-colors" title="Ver aviso">
+                                            <i data-lucide="external-link" class="h-4 w-4"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Contenido del comentario -->
+                                <div class="text-sm text-gray-300 mb-3">
+                                    {{ comentario.contenido }}
+                                </div>
+                                
+                                <!-- Información del aviso relacionado -->
+                                <div class="glassmorphism rounded-lg p-3 border border-gray-700">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="p-1 {% if comentario.aviso.prioridad == 'urgente' %}bg-red-500/20{% elif comentario.aviso.prioridad == 'alta' %}bg-orange-500/20{% else %}bg-costa-green/20{% endif %} rounded">
+                                            <i data-lucide="alert-triangle" class="h-3 w-3 {% if comentario.aviso.prioridad == 'urgente' %}text-red-400{% elif comentario.aviso.prioridad == 'alta' %}text-orange-400{% else %}text-costa-green{% endif %}"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-medium text-white truncate">{{ comentario.aviso.titulo }}</p>
+                                            <p class="text-xs text-gray-400">{{ comentario.aviso.tipo.get_nombre_display }} • {{ comentario.aviso.get_status_display }}</p>
+                                        </div>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {% if comentario.aviso.prioridad == 'urgente' %}bg-red-500/20 text-red-400{% elif comentario.aviso.prioridad == 'alta' %}bg-orange-500/20 text-orange-400{% elif comentario.aviso.prioridad == 'media' %}bg-yellow-500/20 text-yellow-400{% else %}bg-gray-500/20 text-gray-400{% endif %}">
+                                            {{ comentario.aviso.get_prioridad_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Metadatos adicionales -->
+                                {% if comentario.ip_creacion %}
+                                <div class="text-xs text-gray-500 mt-2">
+                                    IP: {{ comentario.ip_creacion }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="px-6 py-8 text-center">
+                        <div class="text-gray-400">
+                            <i data-lucide="message-circle" class="h-12 w-12 mx-auto mb-4 opacity-50"></i>
+                            <p>No se encontraron comentarios</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Paginación -->
+                {% if comentarios.has_other_pages %}
+                <div class="px-6 py-4 border-t border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-400">
+                            Mostrando {{ comentarios.start_index }} - {{ comentarios.end_index }} de {{ comentarios.paginator.count }} resultados
+                        </div>
+                        <div class="flex space-x-2">
+                            {% if comentarios.has_previous %}
+                                <a href="?page={{ comentarios.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.activo %}&activo={{ request.GET.activo }}{% endif %}" 
+                                   class="glassmorphism border border-gray-600 text-gray-300 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:text-white hover:bg-white/10">
+                                    <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                                </a>
+                            {% endif %}
+                            
+                            <span class="glassmorphism border border-costa-green/50 text-costa-green px-3 py-2 rounded-lg font-medium">
+                                {{ comentarios.number }}
+                            </span>
+                            
+                            {% if comentarios.has_next %}
+                                <a href="?page={{ comentarios.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.activo %}&activo={{ request.GET.activo }}{% endif %}" 
+                                   class="glassmorphism border border-gray-600 text-gray-300 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:text-white hover:bg-white/10">
+                                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Overlay para mobile sidebar -->
+    <div class="fixed inset-0 z-40 bg-black bg-opacity-50 hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <script>
+        lucide.createIcons();
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function toggleComentario(comentarioId) {
+            fetch(`/panel-admin/comentarios/${comentarioId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.mensaje);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al procesar la solicitud');
+            });
+        }
+    </script>
+    
+    {% csrf_token %}
+</body>
+</html>
