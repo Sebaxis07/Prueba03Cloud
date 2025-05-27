@@ -515,7 +515,7 @@ class PerfilUsuarioForm(forms.ModelForm):
 
     class Meta:
         model = PerfilUsuario
-        fields = ['telefono', 'sector', 'foto_perfil']
+        fields = ['telefono','rut', 'sector', 'foto_perfil']
         widgets = {
             'telefono': forms.TextInput(attrs={
                 'class': 'w-full glassmorphism-light border border-costa-green/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-costa-green/50 focus:border-costa-green transition-all duration-300',
