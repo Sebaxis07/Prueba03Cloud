@@ -145,7 +145,6 @@
     </style>
 </head>
 <body class="gradient-bg">
-    <!-- Elementos flotantes de fondo -->
     <div class="floating-elements">
         <div class="floating-element w-16 h-16 top-10 left-10" style="animation-delay: 0s;"></div>
         <div class="floating-element w-12 h-12 top-1/4 right-20" style="animation-delay: 1s;"></div>
@@ -156,7 +155,6 @@
 
     <div class="main-container py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-lg mx-auto space-y-6 animate-fade-in">
-            <!-- Header -->
             <div class="text-center animate-slide-up">
                 <div class="flex justify-center mb-4">
                     <div class="relative">
@@ -177,17 +175,13 @@
                 </div>
             </div>
 
-            <!-- Mensajes de Django -->
             <div id="messages-container">
-                <!-- Los mensajes de Django aparecerán aquí -->
             </div>
 
-            <!-- Formulario -->
             <div class="glassmorphism py-6 px-5 shadow-2xl rounded-2xl animate-slide-up backdrop-blur-xl" style="animation-delay: 0.2s;">
                 <form method="post" class="space-y-5" id="registerForm">
                     {% csrf_token %}
                     
-                    <!-- Username -->
                     <div class="relative">
                         <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-white mb-2 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -214,7 +208,6 @@
                         <p class="mt-1 text-xs text-gray-400">Solo letras, números y @/./+/-/_</p>
                     </div>
 
-                    <!-- Nombre y Apellido -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="relative">
                             <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-white mb-2 flex items-center">
@@ -266,7 +259,6 @@
                         </div>
                     </div>
 
-                    <!-- Email -->
                     <div class="relative">
                         <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-white mb-2 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -292,7 +284,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- RUT -->
                     <div class="relative">
                         <label for="{{ form.rut.id_for_label }}" class="block text-sm font-medium text-white mb-2 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -323,7 +314,6 @@
                         <p class="mt-1 text-xs text-gray-400">Formato: 12.345.678-9</p>
                     </div>
 
-                    <!-- Teléfono -->
                     <div class="relative">
                         <label for="{{ form.telefono.id_for_label }}" class="block text-sm font-medium text-white mb-2 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -350,7 +340,6 @@
                         <p class="mt-1 text-xs text-gray-400">Formato: +56912345678</p>
                     </div>
 
-                    <!-- Password1 -->
                     <div class="relative">
                         <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-white mb-2 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -367,7 +356,6 @@
                                 <i data-lucide="eye" id="togglePassword1Icon" class="h-4 w-4 text-gray-400 hover:text-costa-green transition-colors"></i>
                             </button>
                         </div>
-                        <!-- Indicador de fortaleza -->
                         <div class="mt-2">
                             <div class="flex items-center space-x-2">
                                 <div class="flex-1 bg-gray-600 rounded-full h-1">
@@ -406,7 +394,6 @@
                         </div>
                     </div>
 
-                    <!-- Password2 -->
                     <div class="relative">
                         <label for="{{ form.password2.id_for_label }}" class="block text-sm font-medium text-white mb-2 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -439,7 +426,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Errores generales del formulario -->
                     {% if form.non_field_errors %}
                         <div class="glassmorphism-light border border-red-500/50 p-4 rounded-xl shadow-lg error-shake">
                             <div class="flex items-start">
@@ -455,7 +441,6 @@
                         </div>
                     {% endif %}
 
-                    <!-- Términos y condiciones -->
                     <div class="glassmorphism-light p-3 rounded-xl border border-costa-green/20">
                         <div class="flex items-start">
                             <div class="p-1 bg-costa-green/20 rounded-full mr-2 mt-0.5">
@@ -481,8 +466,6 @@
                         </div>
                     </div>
 
-                    <!-- Botón Submit -->
-                    <!-- Botón Submit -->
                     <div class="pt-2">
                         <button type="submit" class="w-full group btn-gradient text-white py-3 px-6 rounded-xl shadow-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-costa-green/30" id="submitBtn">
                             <div class="flex items-center justify-center">
@@ -492,7 +475,6 @@
                         </button>
                     </div>
 
-                    <!-- Links adicionales -->
                     <div class="mt-6">
                         <div class="relative">
                             <div class="absolute inset-0 flex items-center">
@@ -513,7 +495,6 @@
                 </form>
             </div>
 
-            <!-- Volver al inicio -->
             <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">
                 <a href="#" class="group inline-flex items-center text-costa-green hover:text-costa-green-light font-medium transition-all duration-300 glassmorphism-light px-4 py-2 rounded-xl hover:shadow-xl transform hover:scale-105">
                     <i data-lucide="arrow-left" class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform"></i>
@@ -521,7 +502,6 @@
                 </a>
             </div>
 
-            <!-- Información de seguridad -->
             <div class="text-center glassmorphism p-3 rounded-xl shadow-xl animate-slide-up" style="animation-delay: 0.6s;">
                 <div class="flex items-center justify-center space-x-3 text-xs text-gray-400">
                     <div class="flex items-center">
@@ -546,7 +526,6 @@
     <script>
         lucide.createIcons();
 
-        // Toggle password visibility
         function togglePassword(fieldId) {
             const passwordInput = document.getElementById(fieldId);
             const iconId = fieldId.includes('password1') ? 'togglePassword1Icon' : 'togglePassword2Icon';
@@ -562,7 +541,6 @@
             lucide.createIcons();
         }
 
-        // Formateo automático del RUT
         const rutInput = document.getElementById('id_rut');
         const rutValidIcon = document.getElementById('rutValidIcon');
         const rutInvalidIcon = document.getElementById('rutInvalidIcon');
@@ -571,15 +549,12 @@
             rutInput.addEventListener('input', function(e) {
                 let value = e.target.value;
                 
-                // Remover todo excepto números y K
                 value = value.replace(/[^0-9kK]/g, '');
                 
                 if (value.length > 1) {
-                    // Formatear el RUT mientras se escribe
                     let resultado = '';
                     let i = 0;
                     
-                    // Agregar puntos y guión
                     for (i = value.length - 1; i > 0; i--) {
                         if (i === value.length - 1) {
                             resultado = '-' + value.charAt(i) + resultado;
@@ -595,7 +570,6 @@
                 }
             });
             
-            // Validación del RUT
             rutInput.addEventListener('blur', function(e) {
                 let rut = e.target.value;
                 if (rut && rut.length >= 8) {
@@ -617,7 +591,6 @@
             });
         }
 
-        // Función para validar RUT
         function validateRut(rut) {
             // Limpiar RUT
             const cleanRut = rut.replace(/[^0-9kK]/g, '');
@@ -640,7 +613,6 @@
             return dv === computedDv;
         }
 
-        // Validación de fortaleza de contraseña
         const password1 = document.getElementById('id_password1');
         const password2 = document.getElementById('id_password2');
         const strengthIndicator = document.getElementById('passwordStrength');
@@ -651,11 +623,9 @@
             let score = 0;
             let isCommon = false;
 
-            // Lista de contraseñas comunes para verificar
             const commonPasswords = ['password', '123456', '12345678', 'qwerty', 'abc123', 'password123'];
             isCommon = commonPasswords.some(common => password.toLowerCase().includes(common.toLowerCase()));
 
-            // Longitud
             const lengthIcon = document.getElementById('req-length')?.querySelector('i');
             if (lengthIcon) {
                 if (password.length >= 8) {
@@ -668,7 +638,6 @@
                 }
             }
 
-            // No común
             const commonIcon = document.getElementById('req-common')?.querySelector('i');
             if (commonIcon) {
                 if (!isCommon && password.length > 0) {
@@ -681,13 +650,11 @@
                 }
             }
 
-            // Complejidad adicional
             if (/[A-Z]/.test(password)) score += 1;
             if (/[a-z]/.test(password)) score += 1;
             if (/[0-9]/.test(password)) score += 1;
             if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
-            // No solo números
             const numbersIcon = document.getElementById('req-numbers')?.querySelector('i');
             if (numbersIcon) {
                 if (!/^\d+$/.test(password) && password.length > 0) {
@@ -699,7 +666,6 @@
                 }
             }
 
-            // Actualizar indicador
             if (strengthIndicator && strengthText) {
                 if (score <= 2) {
                     strengthIndicator.className = 'strength-indicator strength-weak';
@@ -749,7 +715,6 @@
             }
         }
         
-        // Event listeners para contraseñas
         if (password1) {
             password1.addEventListener('input', function() {
                 checkPasswordStrength(this.value);
@@ -761,7 +726,6 @@
             password2.addEventListener('input', validatePasswords);
         }
 
-        // Form submission - permite envío real del formulario
         const registerForm = document.getElementById('registerForm');
         if (registerForm) {
             registerForm.addEventListener('submit', function(e) {
@@ -771,7 +735,6 @@
                 if (submitBtn && submitText) {
                     const icon = submitBtn.querySelector('i');
                     
-                    // Change button state
                     submitBtn.disabled = true;
                     submitBtn.classList.add('opacity-75');
                     submitText.textContent = 'Creando cuenta...';
@@ -782,13 +745,10 @@
                     
                     lucide.createIcons();
                     
-                    // No hacer preventDefault - permitir envío del formulario
-                    // En caso real Django manejará la redirección
                 }
             });
         }
 
-        // Input animations
         document.querySelectorAll('.form-input').forEach(input => {
             input.addEventListener('focus', function() {
                 if (this.parentElement) {
@@ -803,7 +763,6 @@
             });
         });
 
-        // Re-initialize icons
         setTimeout(() => {
             lucide.createIcons();
         }, 100);

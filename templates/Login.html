@@ -134,7 +134,6 @@
     </style>
 </head>
 <body class="gradient-bg min-h-screen relative overflow-hidden">
-    <!-- Elementos flotantes de fondo -->
     <div class="floating-elements">
         <div class="floating-element w-20 h-20 top-10 left-10" style="animation-delay: 0s;"></div>
         <div class="floating-element w-16 h-16 top-1/4 right-20" style="animation-delay: 1s;"></div>
@@ -144,7 +143,6 @@
 
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="max-w-md w-full space-y-8 animate-fade-in">
-            <!-- Header -->
             <div class="text-center animate-slide-up">
                 <div class="flex justify-center mb-6">
                     <div class="relative">
@@ -165,7 +163,6 @@
                 </div>
             </div>
 
-            <!-- Mensajes -->
             {% if messages %}
                 {% for message in messages %}
                     <div class="mb-4 glassmorphism p-4 rounded-xl shadow-xl animate-slide-up {% if message.tags == 'error' %}border-red-500/50 error-shake{% else %}border-green-500/50{% endif %}">
@@ -182,12 +179,10 @@
                 {% endfor %}
             {% endif %}
 
-            <!-- Formulario -->
             <div class="glassmorphism py-8 px-6 shadow-2xl rounded-2xl animate-slide-up backdrop-blur-xl" style="animation-delay: 0.2s;">
                 <form method="post" class="space-y-6" id="loginForm">
                     {% csrf_token %}
                     
-                    <!-- Username/RUT -->
                     <div class="relative">
                         <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -221,7 +216,6 @@
                         </p>
                     </div>
 
-                    <!-- Password -->
                     <div class="relative">
                         <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -252,7 +246,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Errores generales -->
                     {% if form.non_field_errors %}
                         <div class="glassmorphism-light border border-red-500/50 p-4 rounded-xl shadow-lg error-shake">
                             <div class="flex items-start">
@@ -268,7 +261,6 @@
                         </div>
                     {% endif %}
 
-                    <!-- Botón Submit -->
                     <div class="pt-2">
                         <button type="submit" class="w-full group btn-gradient text-white py-4 px-6 rounded-xl shadow-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-costa-green/30">
                             <div class="flex items-center justify-center">
@@ -279,7 +271,6 @@
                     </div>
                 </form>
 
-                <!-- Links adicionales -->
                 <div class="mt-8">
                     <div class="relative">
                         <div class="absolute inset-0 flex items-center">
@@ -299,7 +290,6 @@
                 </div>
             </div>
 
-            <!-- Volver al inicio -->
             <div class="text-center animate-slide-up" style="animation-delay: 0.4s;">
                 <a href="{% url 'home' %}" class="group inline-flex items-center text-costa-green hover:text-costa-green-light text-lg font-medium transition-all duration-300 glassmorphism-light px-6 py-3 rounded-xl hover:shadow-xl transform hover:scale-105">
                     <i data-lucide="arrow-left" class="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform"></i>
@@ -307,7 +297,6 @@
                 </a>
             </div>
 
-            <!-- Información de seguridad -->
             <div class="text-center glassmorphism p-4 rounded-xl shadow-xl animate-slide-up" style="animation-delay: 0.6s;">
                 <div class="flex items-center justify-center space-x-4 text-sm text-gray-400">
                     <div class="flex items-center">
@@ -327,6 +316,75 @@
     <script>
         lucide.createIcons();
 
+
+        // Enhanced Menu Logic
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userMenu = document.getElementById('user-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuIcon = document.getElementById('mobile-menu-icon');
+
+    // User menu toggle (solo si existe)
+    if (userMenuButton && userMenu) {
+        userMenuButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isHidden = userMenu.classList.contains('hidden');
+            
+            if (isHidden) {
+                userMenu.classList.remove('hidden');
+                userMenu.classList.add('dropdown-enter');
+            } else {
+                userMenu.classList.add('hidden');
+                userMenu.classList.remove('dropdown-enter');
+            }
+        });
+    }
+
+    // Mobile menu toggle
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const isHidden = mobileMenu.classList.toggle('hidden');
+            
+            mobileMenuIcon.setAttribute('data-lucide', isHidden ? 'menu' : 'x');
+            lucide.createIcons();
+        });
+    }
+
+    // Click outside to close menus
+    document.addEventListener('click', (event) => {
+        // Close user menu (solo si existe)
+        if (userMenu && userMenuButton && !userMenu.classList.contains('hidden')) {
+            if (!userMenu.contains(event.target) && !userMenuButton.contains(event.target)) {
+                userMenu.classList.add('hidden');
+                userMenu.classList.remove('dropdown-enter');
+            }
+        }
+        
+        // Close mobile menu
+        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+            if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+                mobileMenu.classList.add('hidden');
+                mobileMenuIcon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            }
+        }
+    });
+
+    // Prevent menu close when clicking inside (solo si existe)
+    if (userMenu) {
+        userMenu.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+    }
+
+    if (mobileMenu) {
+        mobileMenu.addEventListener('click', (event) => {
+            if (event.target.closest('.glassmorphism-strong')) {
+                event.stopPropagation();
+            }
+        });
+    }
         // Toggle password visibility
         function togglePassword() {
             const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
