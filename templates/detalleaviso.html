@@ -245,7 +245,7 @@
                                          class="w-10 h-10 rounded-xl object-cover border-2 border-costa-green/30">
                                 {% else %}
                                     <div class="w-10 h-10 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                                        {{ user.first_name.0|default:user.username.0|upper }}
+                                        {{ user.first_name|default:user.username|first|upper }}
                                     </div>
                                 {% endif %}
                                 <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-costa-green rounded-full border-2 border-costa-black flex items-center justify-center">
@@ -276,7 +276,7 @@
                                              class="w-12 h-12 rounded-xl object-cover border-2 border-costa-green/50">
                                     {% else %}
                                         <div class="w-12 h-12 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                                            {{ user.first_name.0|default:user.username.0|upper }}
+                                            {{ user.first_name|default:user.username|first|upper }}
                                         </div>
                                     {% endif %}
                                     <div>
@@ -339,7 +339,6 @@
                     </div>
                 </div>
 
-                <!-- Mobile menu button -->
                 <div class="md:hidden">
                     <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center p-3 rounded-xl text-gray-400 hover:text-white hover:bg-costa-gray-dark/50 transition-all">
                         <i id="mobile-menu-icon" data-lucide="menu" class="h-6 w-6"></i>
@@ -348,11 +347,9 @@
             </div>
         </div>
 
-        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden">
             <div class="mobile-menu-overlay absolute inset-0 z-40"></div>
             <div class="relative z-50 glassmorphism-strong border-t border-costa-green/20 mx-4 mb-4 rounded-2xl overflow-hidden">
-                <!-- Mobile User Info -->
                 <div class="px-6 py-4 bg-gradient-to-r from-costa-green/10 to-costa-cyan/10 border-b border-costa-green/20">
                     <div class="flex items-center space-x-3">
                         {% if user.perfilusuario.foto_perfil %}
@@ -361,7 +358,7 @@
                                  class="w-12 h-12 rounded-xl object-cover border-2 border-costa-green/50">
                         {% else %}
                             <div class="w-12 h-12 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold">
-                                {{ user.first_name.0|default:user.username.0|upper }}
+                                {{ user.first_name|default:user.username|first|upper }}
                             </div>
                         {% endif %}
                         <div>
@@ -371,7 +368,6 @@
                     </div>
                 </div>
 
-                <!-- Mobile Navigation Items -->
                 <div class="px-4 py-4 space-y-2">
                     <a href="{% url 'crear_aviso' %}" class="flex items-center bg-gradient-to-r from-costa-green to-costa-green-light text-white px-4 py-3 rounded-xl text-base font-semibold button-glow">
                         <i data-lucide="plus" class="mr-3 h-5 w-5"></i>Crear Aviso
@@ -396,7 +392,6 @@
                     {% endif %}
                 </div>
                 
-                <!-- Mobile Logout -->
                 <div class="px-4 pb-4 pt-2 border-t border-costa-green/20">
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
@@ -409,7 +404,6 @@
         </div>
     </nav>
 
-    <!-- Mensajes -->
     {% if messages %}
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 relative z-10">
             {% for message in messages %}
@@ -429,9 +423,7 @@
     {% endif %}
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        <!-- Detalle del Aviso -->
         <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
-            <!-- Header del aviso -->
             <div class="relative p-6 {% if aviso.prioridad == 'urgente' %}bg-gradient-to-r from-red-600/90 to-red-700/90{% elif aviso.prioridad == 'alta' %}bg-gradient-to-r from-orange-600/90 to-orange-700/90{% elif aviso.prioridad == 'media' %}bg-gradient-to-r from-yellow-600/90 to-yellow-700/90{% else %}bg-gradient-to-r from-costa-green to-costa-green-dark{% endif %} backdrop-blur-xl">
                 <div class="absolute inset-0 {% if aviso.prioridad == 'urgente' %}bg-red-500/20{% elif aviso.prioridad == 'alta' %}bg-orange-500/20{% elif aviso.prioridad == 'media' %}bg-yellow-500/20{% else %}bg-costa-green/20{% endif %} backdrop-blur-sm"></div>
                 
@@ -466,7 +458,6 @@
 
                     <h1 class="text-2xl md:text-3xl font-bold mb-4 text-white drop-shadow-lg">{{ aviso.titulo }}</h1>
 
-                    <!-- Información del usuario -->
                     <div class="flex items-center text-sm text-white/90">
                         {% if not aviso.es_anonimo %}
                             <i data-lucide="user" class="h-4 w-4 mr-2"></i>
@@ -481,9 +472,7 @@
                 </div>
             </div>
 
-            <!-- Contenido principal -->
             <div class="p-6">
-                <!-- Descripción -->
                 <div class="mb-6">
                     <h2 class="text-lg font-semibold text-white mb-3 flex items-center">
                         <div class="p-1 bg-costa-green/20 rounded mr-2">
@@ -496,7 +485,6 @@
                     </div>
                 </div>
 
-                <!-- Detalles específicos del asalto -->
                 {% if aviso.detalle_asalto %}
                 <div class="mb-6">
                     <h2 class="text-lg font-semibold text-white mb-3 flex items-center">
@@ -507,7 +495,6 @@
                     </h2>
                     <div class="glassmorphism-light rounded-xl p-4 border border-red-500/30">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Cantidad de asaltantes -->
                             <div class="glassmorphism p-4 rounded-lg border border-red-400/20">
                                 <h3 class="font-medium text-red-300 mb-2 flex items-center">
                                     <i data-lucide="users" class="h-4 w-4 mr-2"></i>
@@ -516,7 +503,6 @@
                                 <p class="text-white text-lg font-bold">{{ aviso.detalle_asalto.cantidad_asaltantes }}</p>
                             </div>
 
-                            <!-- Armas utilizadas -->
                             {% if aviso.detalle_asalto.armas_usadas %}
                             <div class="glassmorphism p-4 rounded-lg border border-red-400/20">
                                 <h3 class="font-medium text-red-300 mb-2 flex items-center">
@@ -527,7 +513,6 @@
                             </div>
                             {% endif %}
 
-                            <!-- Descripción física -->
                             {% if aviso.detalle_asalto.descripcion_fisica %}
                             <div class="glassmorphism p-4 rounded-lg border border-red-400/20 md:col-span-2">
                                 <h3 class="font-medium text-red-300 mb-2 flex items-center">
@@ -538,7 +523,6 @@
                             </div>
                             {% endif %}
 
-                            <!-- Vehículo usado -->
                             {% if aviso.detalle_asalto.vehiculo_usado %}
                             <div class="glassmorphism p-4 rounded-lg border border-red-400/20">
                                 <h3 class="font-medium text-red-300 mb-2 flex items-center">
@@ -549,7 +533,6 @@
                             </div>
                             {% endif %}
 
-                            <!-- Dirección de huida -->
                             {% if aviso.detalle_asalto.direccion_huida %}
                             <div class="glassmorphism p-4 rounded-lg border border-red-400/20">
                                 <h3 class="font-medium text-red-300 mb-2 flex items-center">
@@ -561,7 +544,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- Alerta de seguridad -->
                         <div class="mt-4 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                             <div class="flex items-start">
                                 <div class="p-1 bg-red-500/20 rounded mr-3 flex-shrink-0">
@@ -580,7 +562,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Imagen si existe -->
                 {% if aviso.imagen %}
                 <div class="mb-6">
                     <h2 class="text-lg font-semibold text-white mb-3 flex items-center">
@@ -597,7 +578,6 @@
                     </div>
                 </div>
 
-                <!-- Modal para imagen -->
                 <div id="imageModal" class="fixed inset-0 bg-black/90 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeImageModal()">
                     <div class="max-w-full max-h-full animate-fade-in">
                         <img id="modalImage" src="" alt="Imagen ampliada" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
@@ -610,7 +590,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Información de ubicación -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="glassmorphism-light p-4 rounded-xl border border-blue-500/30">
                         <h3 class="font-medium text-white mb-2 flex items-center">
@@ -628,7 +607,6 @@
                     </div>
                 </div>
 
-                <!-- Teléfono de contacto si existe -->
                 {% if aviso.telefono_contacto %}
                 <div class="glassmorphism-light border border-yellow-500/30 p-4 rounded-xl mb-6">
                     <h3 class="font-medium text-white mb-2 flex items-center">
@@ -640,7 +618,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Información adicional -->
                 <div class="glassmorphism-light rounded-xl p-4 mb-6">
                     <h3 class="font-medium text-white mb-3 flex items-center">
                         <i data-lucide="info" class="h-5 w-5 mr-2 text-costa-green"></i>
@@ -670,11 +647,9 @@
                     </div>
                 </div>
 
-                <!-- Acciones del usuario -->
                 <div class="mt-6 flex items-center justify-between flex-wrap gap-4">
                     <div class="flex items-center space-x-4">
                         {% if user.is_authenticated and user == aviso.usuario %}
-                            <!-- Solo el creador del aviso verá estos controles -->
                             <div class="flex items-center space-x-4 flex-wrap">
                                 <div class="flex items-center space-x-2">
                                     <label for="estado-select" class="text-sm font-medium text-gray-300">Estado:</label>
@@ -698,7 +673,6 @@
                         {% endif %}
                     </div>
                     
-                    <!-- Estado actual (visible para todos) -->
                     <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium glassmorphism-light border
                         {% if aviso.status == 'activo' %}border-red-500/50 text-red-400
                         {% elif aviso.status == 'en_proceso' %}border-yellow-500/50 text-yellow-400
@@ -711,113 +685,7 @@
             </div>
         </div>
 
-        <!-- Sección de Comentarios -->
-        <div class="mt-8 glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up" style="animation-delay: 0.2s;">
-            <div class="glassmorphism-light px-6 py-4 border-b border-costa-green/20">
-                <h2 class="text-xl font-semibold text-white flex items-center">
-                    <div class="p-2 bg-costa-green/20 rounded-lg mr-3">
-                        <i data-lucide="message-circle" class="h-5 w-5 text-costa-green"></i>
-                    </div>
-                    Comentarios ({{ comentarios.count }})
-                </h2>
-                <p class="text-gray-400 text-sm mt-1">Comparte información adicional o pregunta sobre este aviso</p>
-            </div>
-
-            <!-- Formulario para nuevo comentario -->
-            {% if user.is_authenticated %}
-            <div class="p-6 border-b border-costa-green/20 glassmorphism-light">
-                <div class="flex items-start space-x-4">
-                    <div class="btn-gradient text-white rounded-full p-3 shadow-lg">
-                        <i data-lucide="user" class="h-5 w-5"></i>
-                    </div>
-                    <div class="flex-1">
-                        <form id="comentario-form" method="post" action="{% url 'agregar_comentario' aviso.id %}">
-                            {% csrf_token %}
-                            <div class="mb-4">
-                                <label for="{{ comentario_form.contenido.id_for_label }}" class="block text-sm font-medium text-white mb-2">
-                                    Agregar tu comentario
-                                </label>
-                                <textarea name="{{ comentario_form.contenido.name }}" 
-                                          id="{{ comentario_form.contenido.id_for_label }}"
-                                          rows="3" 
-                                          class="w-full glassmorphism-light border border-costa-green/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-costa-green/50 focus:border-costa-green transition-all duration-300 resize-none"
-                                          placeholder="Escribe tu comentario aquí..." 
-                                          required></textarea>
-                                <p class="text-xs text-gray-500 mt-1">Comparte información útil que pueda ayudar a la comunidad</p>
-                            </div>
-                            <button type="submit" class="group btn-gradient text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg">
-                                <i data-lucide="send" class="inline h-4 w-4 mr-2 group-hover:scale-110 transition-transform"></i>
-                                Publicar Comentario
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="p-6 border-b border-costa-green/20 glassmorphism-light text-center">
-                <div class="mb-4">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-yellow-500/20 rounded-full mb-4">
-                        <i data-lucide="lock" class="h-8 w-8 text-yellow-400"></i>
-                    </div>
-                    <p class="text-gray-300 mb-4 font-medium">Debes iniciar sesión para comentar</p>
-                </div>
-                <div class="flex justify-center space-x-3">
-                    <a href="{% url 'login' %}" class="group btn-gradient text-white px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg">
-                        <i data-lucide="log-in" class="inline h-4 w-4 mr-2"></i>
-                        Iniciar Sesión
-                    </a>
-                    <a href="{% url 'registro' %}" class="group glassmorphism-light border border-costa-green/50 text-costa-green px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:bg-costa-green/10">
-                        <i data-lucide="user-plus" class="inline h-4 w-4 mr-2"></i>
-                        Registrarse
-                    </a>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Lista de comentarios -->
-            <div class="p-6">
-                {% if comentarios %}
-                    <div class="space-y-6" id="comentarios-lista">
-                        {% for comentario in comentarios %}
-                        <div class="glassmorphism-light p-4 rounded-xl border border-costa-green/20 hover:border-costa-green/40 transition-all duration-300 animate-slide-up">
-                            <div class="flex items-start space-x-4">
-                                <div class="bg-costa-green/20 text-costa-green rounded-full p-2 flex-shrink-0">
-                                    <i data-lucide="user" class="h-4 w-4"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="font-medium text-white">
-                                            {{ comentario.usuario.get_full_name|default:comentario.usuario.username }}
-                                        </span>
-                                        <span class="text-sm text-gray-400">
-                                            {{ comentario.fecha_creacion|date:"d/m/Y H:i" }}
-                                        </span>
-                                    </div>
-                                    <p class="text-gray-300 leading-relaxed">{{ comentario.contenido|linebreaks }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-8">
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-costa-green/20 rounded-full mb-4">
-                            <i data-lucide="message-circle" class="h-8 w-8 text-costa-green"></i>
-                        </div>
-                        <h3 class="text-lg font-medium text-white mb-2">No hay comentarios aún</h3>
-                        <p class="text-gray-400">
-                            {% if user.is_authenticated %}
-                                ¡Sé el primero en comentar y ayudar a la comunidad!
-                            {% else %}
-                                Inicia sesión para ser el primero en comentar
-                            {% endif %}
-                        </p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Acciones rápidas -->
+ 
         <div class="mt-8 glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up" style="animation-delay: 0.4s;">
             <div class="glassmorphism-light px-6 py-4 border-b border-costa-green/20">
                 <h2 class="text-xl font-semibold text-white flex items-center">
@@ -860,11 +728,9 @@
         </div>
     </div>
 
-    <script>
-        // Inicializar iconos Lucide
+    <script src="/static/js/detalleaviso.js">
         lucide.createIcons();
         
-        // Funciones para modal de imagen
         function openImageModal(src) {
             document.getElementById('modalImage').src = src;
             document.getElementById('imageModal').classList.remove('hidden');
@@ -876,111 +742,16 @@
             document.body.style.overflow = 'auto';
         }
         
-        // Cerrar modal con ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeImageModal();
             }
         });
         
-        // Manejar formulario de comentarios con AJAX
-        {% if user.is_authenticated %}
-        document.getElementById('comentario-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            
-            // Deshabilitar botón
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i data-lucide="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Enviando...';
-            
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Limpiar formulario
-                    this.reset();
+       
                     
-                    // Agregar nuevo comentario a la lista
-                    const comentariosList = document.getElementById('comentarios-lista');
                     
-                    // Crear avatar basado en si el usuario tiene foto o no
-                    let avatarHtml = '';
-                    if (data.comentario.foto_perfil) {
-                        avatarHtml = `<img src="${data.comentario.foto_perfil}" 
-                                           alt="Foto de ${data.comentario.usuario}"
-                                           class="w-10 h-10 rounded-full object-cover border-2 border-costa-green/50 shadow-lg">`;
-                    } else {
-                        avatarHtml = `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-costa-green to-costa-green-dark flex items-center justify-center border-2 border-costa-green/50 shadow-lg">
-                                        <i data-lucide="user" class="h-5 w-5 text-white"></i>
-                                      </div>`;
-                    }
-                    
-                    const nuevoComentario = `
-                        <div class="glassmorphism-light p-4 rounded-xl border border-costa-green/20 hover:border-costa-green/40 transition-all duration-300 animate-slide-up">
-                            <div class="flex items-start space-x-4">
-                                <div class="flex-shrink-0">
-                                    ${avatarHtml}
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="font-medium text-white">${data.comentario.usuario}</span>
-                                        <span class="text-sm text-gray-400">${data.comentario.fecha}</span>
-                                    </div>
-                                    <p class="text-gray-300 leading-relaxed">${data.comentario.contenido}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    if (comentariosList) {
-                        comentariosList.insertAdjacentHTML('beforeend', nuevoComentario);
-                    } else {
-                        // Si no hay comentarios, reemplazar el mensaje vacío
-                        const emptyState = document.querySelector('.text-center.py-8');
-                        if (emptyState) {
-                            emptyState.outerHTML = `<div class="space-y-6" id="comentarios-lista">${nuevoComentario}</div>`;
-                        }
-                    }
-                    
-                    // Actualizar contador de comentarios
-                    const counter = document.querySelector('h2');
-                    if (counter && counter.textContent.includes('Comentarios')) {
-                        const currentCount = parseInt(counter.textContent.match(/\d+/)[0]);
-                        counter.innerHTML = counter.innerHTML.replace(/\d+/, currentCount + 1);
-                    }
-                    
-                    // Mostrar mensaje de éxito
-                    showMessage('¡Comentario agregado exitosamente!', 'success');
-                    
-                    // Re-inicializar iconos
-                    lucide.createIcons();
-                } else {
-                    showMessage('Error al agregar comentario', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('Error de conexión', 'error');
-            })
-            .finally(() => {
-                // Rehabilitar botón
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-                lucide.createIcons();
-            });
-        });
-        {% endif %}
         
-        // Función para mostrar mensajes
         function showMessage(text, type) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `fixed top-4 right-4 p-4 rounded-xl z-50 transition-all duration-500 transform translate-x-full glassmorphism-light border shadow-2xl ${
@@ -999,15 +770,12 @@
             `;
             document.body.appendChild(messageDiv);
             
-            // Re-inicializar iconos
             lucide.createIcons();
             
-            // Animar entrada
             setTimeout(() => {
                 messageDiv.classList.remove('translate-x-full');
             }, 100);
             
-            // Remover después de 5 segundos
             setTimeout(() => {
                 messageDiv.classList.add('translate-x-full');
                 setTimeout(() => {
@@ -1016,7 +784,6 @@
             }, 5000);
         }
         
-        // Función para cambiar estado del aviso
         {% if user.is_authenticated and user == aviso.usuario %}
         function cambiarEstado() {
             const nuevoEstado = document.getElementById('estado-select').value;
@@ -1042,13 +809,11 @@
             .then(data => {
                 if (data.success) {
                     showMessage(data.mensaje, 'success');
-                    // Actualizar la página para reflejar el cambio
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
                     showMessage(data.mensaje, 'error');
-                    // Revertir el select
                     document.getElementById('estado-select').value = estadoActual;
                 }
             })
@@ -1059,14 +824,12 @@
             });
         }
         
-        // Función para confirmar eliminación
         function confirmarEliminar() {
             if (confirm('¿Estás seguro de que quieres eliminar este aviso?\n\nEsta acción no se puede deshacer.')) {
                 eliminarAviso();
             }
         }
         
-        // Función para eliminar aviso
         function eliminarAviso() {
             fetch('{% url "eliminar_aviso" aviso.id %}', {
                 method: 'POST',
@@ -1079,7 +842,6 @@
             .then(data => {
                 if (data.success) {
                     showMessage(data.mensaje, 'success');
-                    // Redirigir a mis avisos después de un delay
                     setTimeout(() => {
                         window.location.href = '{% url "mis_avisos" %}';
                     }, 1000);
@@ -1095,14 +857,12 @@
         {% endif %}
         lucide.createIcons();
     
-    // Enhanced Menu Logic
     const userMenuButton = document.getElementById('user-menu-button');
     const userMenu = document.getElementById('user-menu');
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuIcon = document.getElementById('mobile-menu-icon');
 
-    // User menu toggle (solo si existe)
     if (userMenuButton && userMenu) {
         userMenuButton.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -1118,7 +878,6 @@
         });
     }
 
-    // Mobile menu toggle
     if (mobileMenuButton) {
         mobileMenuButton.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -1129,9 +888,7 @@
         });
     }
 
-    // Click outside to close menus
     document.addEventListener('click', (event) => {
-        // Close user menu (solo si existe)
         if (userMenu && userMenuButton && !userMenu.classList.contains('hidden')) {
             if (!userMenu.contains(event.target) && !userMenuButton.contains(event.target)) {
                 userMenu.classList.add('hidden');
@@ -1139,7 +896,6 @@
             }
         }
         
-        // Close mobile menu
         if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
             if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
                 mobileMenu.classList.add('hidden');
@@ -1149,7 +905,6 @@
         }
     });
 
-    // Prevent menu close when clicking inside (solo si existe)
     if (userMenu) {
         userMenu.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -1163,7 +918,6 @@
             }
         });
     }
-        // Re-inicializar iconos después de cargar
         setTimeout(() => {
             lucide.createIcons();
         }, 100);

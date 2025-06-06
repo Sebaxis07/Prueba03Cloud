@@ -115,7 +115,7 @@
     </style>
 </head>
 <body class="gradient-bg min-h-screen relative">
-    <!-- Elementos flotantes de fondo -->
+
     <div class="floating-elements">
         <div class="floating-element w-12 h-12 top-10 left-10" style="animation-delay: 0s;"></div>
         <div class="floating-element w-8 h-8 top-1/4 right-20" style="animation-delay: 1s;"></div>
@@ -123,7 +123,7 @@
         <div class="floating-element w-10 h-10 bottom-10 right-10" style="animation-delay: 1.5s;"></div>
     </div>
 
-    <!-- Sidebar -->
+
     <div class="fixed inset-y-0 left-0 z-50 w-64 glassmorphism shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="sidebar">
         <div class="flex items-center justify-center h-16 border-b border-costa-green/20">
             <div class="flex items-center">
@@ -150,11 +150,7 @@
                     Usuarios
                     <span class="ml-auto bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-xs">{{ total_usuarios }}</span>
                 </a>
-                <a href="{% url 'admin_comentarios_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
-                    <i data-lucide="message-circle" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
-                    Comentarios
-                    <span class="ml-auto bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">{{ total_comentarios }}</span>
-                </a>
+                
                 <a href="{% url 'admin_estadisticas' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
                     <i data-lucide="bar-chart-3" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
                     Estadísticas
@@ -177,9 +173,8 @@
         </nav>
     </div>
 
-    <!-- Main Content -->
     <div class="lg:pl-64 flex flex-col min-h-screen">
-        <!-- Top Bar -->
+
         <header class="glassmorphism shadow-xl relative z-10">
             <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center">
@@ -201,9 +196,9 @@
             </div>
         </header>
 
-        <!-- Dashboard Content -->
+
         <main class="flex-1 p-4 sm:p-6 lg:p-8 relative z-10">
-            <!-- Estadísticas Principales -->
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="stat-card glassmorphism-card rounded-2xl p-6 shadow-2xl animate-slide-up">
                     <div class="flex items-center">
@@ -247,22 +242,8 @@
                         </div>
                     </div>
                 </div>
+              
 
-                <div class="stat-card glassmorphism-card rounded-2xl p-6 shadow-2xl animate-slide-up" style="animation-delay: 0.3s;">
-                    <div class="flex items-center">
-                        <div class="p-3 bg-yellow-500/20 rounded-lg">
-                            <i data-lucide="message-circle" class="h-8 w-8 text-yellow-400"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-400">Comentarios</p>
-                            <p class="text-2xl font-bold text-white">{{ total_comentarios }}</p>
-                            <p class="text-xs text-gray-400">Interacciones</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Estados de Avisos -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div class="glassmorphism-card rounded-2xl p-6 shadow-2xl animate-slide-up" style="animation-delay: 0.4s;">
                     <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
@@ -336,9 +317,9 @@
                 </div>
             </div>
 
-            <!-- Listas Recientes -->
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Avisos Recientes -->
+          
                 <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up" style="animation-delay: 0.7s;">
                     <div class="glassmorphism-light px-6 py-4 border-b border-costa-green/20">
                         <h3 class="text-lg font-semibold text-white flex items-center">
@@ -373,7 +354,7 @@
                     </div>
                 </div>
 
-                <!-- Usuarios Recientes -->
+          
                 <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden animate-slide-up" style="animation-delay: 0.8s;">
                     <div class="glassmorphism-light px-6 py-4 border-b border-costa-green/20">
                         <h3 class="text-lg font-semibold text-white flex items-center">
@@ -419,48 +400,11 @@
         </main>
     </div>
 
-    <!-- Overlay para mobile sidebar -->
+
     <div class="fixed inset-0 z-40 bg-black bg-opacity-50 hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <script>
-        lucide.createIcons();
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
-        // Auto-refresh stats every 30 seconds
-        setTimeout(() => {
-            window.location.reload();
-        }, 30000);
-
-        // Animate counters
-        function animateCounter(element, target) {
-            let current = 0;
-            const increment = target / 50;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    element.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    element.textContent = Math.floor(current);
-                }
-            }, 20);
-        }
-
-        // Initialize counter animations
-        document.addEventListener('DOMContentLoaded', () => {
-            const counters = document.querySelectorAll('.stat-card .text-2xl');
-            counters.forEach(counter => {
-                const target = parseInt(counter.textContent);
-                animateCounter(counter, target);
-            });
-        });
+    <script src="/static/js/admin/dash.js"> 
+        
     </script>
 </body>
 </html>

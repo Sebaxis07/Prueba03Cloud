@@ -42,7 +42,7 @@
     </style>
 </head>
 <body class="gradient-bg min-h-screen">
-    <!-- Sidebar -->
+
     <div class="fixed inset-y-0 left-0 z-50 w-64 glassmorphism shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="sidebar">
         <div class="flex items-center justify-center h-16 border-b border-costa-green/20">
             <div class="flex items-center">
@@ -67,10 +67,7 @@
                     <i data-lucide="users" class="mr-3 h-5 w-5 text-costa-green group-hover:scale-110 transition-transform"></i>
                     Usuarios
                 </a>
-                <a href="{% url 'admin_comentarios_list' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
-                    <i data-lucide="message-circle" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
-                    Comentarios
-                </a>
+                
                 <a href="{% url 'admin_estadisticas' %}" class="group flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300">
                     <i data-lucide="bar-chart-3" class="mr-3 h-5 w-5 group-hover:scale-110 transition-transform"></i>
                     Estadísticas
@@ -93,9 +90,9 @@
         </nav>
     </div>
 
-    <!-- Main Content -->
+
     <div class="lg:pl-64 flex flex-col min-h-screen">
-        <!-- Top Bar -->
+
         <header class="glassmorphism shadow-xl">
             <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center">
@@ -114,9 +111,9 @@
             </div>
         </header>
 
-        <!-- Content -->
+
         <main class="flex-1 p-4 sm:p-6 lg:p-8">
-            <!-- Filtros -->
+
             <div class="glassmorphism-card rounded-2xl p-6 mb-8 shadow-2xl">
                 <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
                     <i data-lucide="filter" class="h-5 w-5 mr-2 text-costa-green"></i>
@@ -124,6 +121,7 @@
                 </h2>
                 
                 <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% csrf_token %}
                     <div>
                         <input type="text" name="search" placeholder="Buscar usuario, email..." value="{{ current_filters.search|default:'' }}" 
                                class="w-full px-4 py-2 bg-costa-gray-dark border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-costa-green focus:border-transparent">
@@ -158,7 +156,7 @@
                 </form>
             </div>
 
-            <!-- Lista de Usuarios -->
+ 
             <div class="glassmorphism-card rounded-2xl shadow-2xl overflow-hidden">
                 <div class="px-6 py-4 border-b border-costa-green/20">
                     <h2 class="text-lg font-semibold text-white flex items-center">
@@ -280,7 +278,7 @@
                     </table>
                 </div>
                 
-                <!-- Paginación -->
+     
                 {% if usuarios.has_other_pages %}
                 <div class="px-6 py-4 border-t border-gray-700">
                     <div class="flex items-center justify-between">
@@ -313,7 +311,7 @@
         </main>
     </div>
 
-    <!-- Modal para detalles de usuario -->
+
     <div id="userModal" class="fixed inset-0 z-50 hidden">
         <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeUserModal()"></div>
         <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -325,7 +323,7 @@
                     </h3>
                 </div>
                 <div id="userModalContent" class="p-6">
-                    <!-- El contenido se cargará aquí -->
+              
                 </div>
                 <div class="px-6 py-4 border-t border-gray-700">
                     <button onclick="closeUserModal()" class="glassmorphism border border-gray-600 text-gray-300 px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:text-white hover:bg-white/10">
@@ -336,103 +334,11 @@
         </div>
     </div>
 
-    <!-- Overlay para mobile sidebar -->
+
     <div class="fixed inset-0 z-40 bg-black bg-opacity-50 hidden" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <script>
-        setTimeout(() => {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }, 500);
-
-// Para debugging - abre la consola del navegador (F12) y ejecuta:
-lucide.createIcons();
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
-        function toggleUsuario(userId) {
-            fetch(`/panel-admin/usuarios/${userId}/toggle/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.mensaje);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al procesar la solicitud');
-            });
-        }
-
-        function toggleVerificacion(userId) {
-            fetch(`/panel-admin/usuarios/${userId}/verificar/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.mensaje);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al procesar la solicitud');
-            });
-        }
-
-        function verDetalles(userId) {
-            // Aquí puedes cargar más detalles del usuario
-            const usuarios = {{ usuarios|safe }};
-            const modal = document.getElementById('userModal');
-            const content = document.getElementById('userModalContent');
-            
-            // Encontrar el usuario
-            // Por simplicidad, se recargará la página o se puede implementar una API
-            content.innerHTML = `
-                <div class="text-center py-8">
-                    <i data-lucide="loader" class="h-8 w-8 mx-auto mb-4 text-costa-green animate-spin"></i>
-                    <p class="text-gray-400">Cargando detalles del usuario...</p>
-                </div>
-            `;
-            
-            modal.classList.remove('hidden');
-            lucide.createIcons();
-            
-            // Simular carga (implementar endpoint si es necesario)
-            setTimeout(() => {
-                content.innerHTML = `
-                    <div class="text-center py-8">
-                        <p class="text-gray-400">Funcionalidad en desarrollo</p>
-                        <p class="text-sm text-gray-500 mt-2">Próximamente mostrará estadísticas detalladas del usuario</p>
-                    </div>
-                `;
-            }, 1000);
-        }
-
-        function closeUserModal() {
-            document.getElementById('userModal').classList.add('hidden');
-        }
+    <script src="/static/js/admin/users.js">
+        
     </script>
     
     {% csrf_token %}
