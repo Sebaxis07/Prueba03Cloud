@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator, MinLengthValidator
 from django.utils import timezone
 from django.urls import reverse
 import os
+from django.shortcuts import render
 import re
 
 def user_directory_path(instance, filename):
@@ -126,6 +127,15 @@ class TipoAviso(models.Model):
         </span>
         '''
 
+class Custom429Middleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if response.status_code == 429:
+            return render(request, 'bloqueado.html', status=429)
+        return response
 class Aviso(models.Model):
     PRIORIDAD_CHOICES = [
         ('baja', 'Baja'),

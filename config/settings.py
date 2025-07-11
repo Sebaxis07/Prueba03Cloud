@@ -59,7 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'avisos.middleware.AdminProtectionMiddleware', # This can be here or higher depending on its function
+    'avisos.middleware.AdminProtectionMiddleware',
+    'avisos.middleware.Custom429Middleware', # This can be here or higher depending on its function
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -178,7 +179,7 @@ CSRF_COOKIE_HTTPONLY = False      # Default is False, which is correct
 
 # CSRF Settings for development
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
-CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF mysql -h cloud4.cvcevyn7cnze.us-east-1.rds.amazonaws.com -u admin -p
 CSRF_COOKIE_SAMESITE = 'Lax'  # Allow CSRF cookies in same-site requests
 
 # Optional but Recommended for stronger HTTPS enforcement
