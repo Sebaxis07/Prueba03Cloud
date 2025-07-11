@@ -4,8 +4,8 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
 
-# Importación de ratelimit para protección contra fuerza bruta
-from ratelimit.decorators import RateLimitDecorator
+# CORRECCIÓN: Se importa el decorador correcto.
+from ratelimit.decorators import ratelimit
 
 from avisos.authentication import User
 from .forms import RegistroForm, LoginForm, AvisoForm, ComentarioForm, BusquedaForm, DetalleAsaltoForm, PerfilUsuarioForm
@@ -64,7 +64,8 @@ def home(request):
 
     return render(request, 'Home.html', context)
 
-@RateLimitDecorator(calls=5, period=3600)  # 5 calls per hour
+# CORRECCIÓN: Se aplica el decorador con la sintaxis correcta.
+@ratelimit(key='ip', rate='5/h', block=True) # 5 registros por hora desde la misma IP
 @csrf_protect
 def registro(request):
     """Vista de registro de usuarios con validaciones de seguridad"""
@@ -100,7 +101,8 @@ def registro(request):
 
     return render(request, 'register.html', {'form': form})
 
-@method_decorator(RateLimitDecorator(calls=10, period=600), name='dispatch')  # 10 calls per 10 minutes
+# CORRECCIÓN: Se aplica el decorador con la sintaxis correcta para vistas de clase.
+@method_decorator(ratelimit(key='ip', rate='10/m', block=True), name='dispatch') # 10 intentos por minuto
 class CustomLoginView(LoginView):
     form_class = LoginForm
     template_name = 'Login.html'
@@ -113,7 +115,7 @@ class CustomLoginView(LoginView):
         username_input = form.cleaned_data.get('username')
 
         original_input = self.request.POST.get('username', '')
-        if form.is_rut_format(original_input):
+        if hasattr(form, 'is_rut_format') and form.is_rut_format(original_input):
             messages.success(self.request, f'¡Bienvenido {user.first_name or user.username}! Sesión iniciada con RUT.')
         else:
             messages.success(self.request, f'¡Bienvenido {user.first_name or user.username}!')
@@ -128,12 +130,13 @@ class CustomLoginView(LoginView):
             original_input = self.request.POST.get('username', '')
             if hasattr(form, 'is_rut_format') and form.is_rut_format(original_input):
                 logger.debug(f"RUT detectado: {original_input}")
-                rut_clean = form.clean_rut(original_input)
-                try:
-                    perfil = PerfilUsuario.objects.get(rut__icontains=rut_clean)
-                    logger.debug(f"RUT encontrado en BD para usuario: {perfil.usuario.username}")
-                except PerfilUsuario.DoesNotExist:
-                    logger.debug(f"RUT no encontrado en BD: {rut_clean}")
+                if hasattr(form, 'clean_rut'):
+                    rut_clean = form.clean_rut(original_input)
+                    try:
+                        perfil = PerfilUsuario.objects.get(rut__icontains=rut_clean)
+                        logger.debug(f"RUT encontrado en BD para usuario: {perfil.usuario.username}")
+                    except PerfilUsuario.DoesNotExist:
+                        logger.debug(f"RUT no encontrado en BD: {rut_clean}")
 
         original_input = self.request.POST.get('username', '')
         if hasattr(form, 'is_rut_format') and form.is_rut_format(original_input):
@@ -240,6 +243,7 @@ class AvisoCreateView(CreateView):
     model = Aviso
     form_class = AvisoForm
     template_name = 'crearavi.html'
+    success_url = reverse_lazy('dashboard')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -272,6 +276,7 @@ class AvisoUpdateView(UserPassesTestMixin, UpdateView):
     model = Aviso
     form_class = AvisoForm
     template_name = 'editaravisos.html'
+    success_url = reverse_lazy('dashboard')
 
     def test_func(self):
         aviso = self.get_object()
@@ -305,7 +310,7 @@ def agregar_comentario(request, aviso_id):
                 if hasattr(request.user, 'perfilusuario') and request.user.perfilusuario.foto_perfil:
                     foto_perfil_url = request.user.perfilusuario.foto_perfil.url
             except:
-                pass  # Si no tiene perfil o foto, quedará como None
+                pass
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -469,11 +474,20 @@ def api_tipos_aviso(request):
     tipos = TipoAviso.objects.filter(activo=True).values('id', 'nombre')
     tipos_con_display = []
     for tipo in tipos:
-        tipos_con_display.append({
-            'id': tipo['id'],
-            'nombre': tipo['nombre'],
-            'display_name': dict(TipoAviso.TIPOS_CHOICES)[tipo['nombre']]
-        })
+        # Asumiendo que TipoAviso tiene un campo 'TIPOS_CHOICES' para obtener el display name
+        if hasattr(TipoAviso, 'TIPOS_CHOICES'):
+            try:
+                display_name = dict(TipoAviso.TIPOS_CHOICES).get(tipo['nombre'], tipo['nombre'])
+                tipos_con_display.append({
+                    'id': tipo['id'],
+                    'nombre': tipo['nombre'],
+                    'display_name': display_name
+                })
+            except TypeError:
+                 tipos_con_display.append(tipo)
+        else:
+            tipos_con_display.append(tipo)
+
 
     return JsonResponse({'tipos': tipos_con_display})
 
@@ -527,19 +541,10 @@ def cambiar_estado_aviso(request, aviso_id):
     try:
         aviso = get_object_or_404(Aviso, id=aviso_id, activo=True)
 
+        # Solo el dueño o un admin puede cambiar el estado.
         if request.user != aviso.usuario and not request.user.is_staff:
-            data = json.loads(request.body) if request.body else {}
-            nuevo_estado = data.get('estado') or request.POST.get('estado')
-
-            if nuevo_estado != 'resuelto':
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'success': False,
-                        'mensaje': 'Solo puedes marcar avisos como resueltos'
-                    }, status=403)
-                else:
-                    messages.error(request, 'Solo puedes marcar avisos como resueltos.')
-                    return redirect('aviso_detalle', pk=aviso_id)
+            messages.error(request, 'No tienes permisos para realizar esta acción.')
+            return redirect('aviso_detalle', pk=aviso_id)
 
         if request.content_type == 'application/json':
             data = json.loads(request.body)
@@ -550,22 +555,17 @@ def cambiar_estado_aviso(request, aviso_id):
         estados_validos = [choice[0] for choice in Aviso.STATUS_CHOICES]
         if nuevo_estado not in estados_validos:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': False,
-                    'mensaje': 'Estado no válido'
-                }, status=400)
+                return JsonResponse({'success': False, 'mensaje': 'Estado no válido'}, status=400)
             else:
                 messages.error(request, 'Estado no válido.')
                 return redirect('aviso_detalle', pk=aviso_id)
 
         estado_anterior = aviso.status
-
         aviso.status = nuevo_estado
         aviso.save()
 
         logger.info(f"Estado de aviso cambiado por {request.user.username}: {aviso.titulo} (ID: {aviso.id}) de '{estado_anterior}' a '{nuevo_estado}'")
-
-        estado_display = dict(Aviso.STATUS_CHOICES)[nuevo_estado]
+        estado_display = aviso.get_status_display()
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({
@@ -582,10 +582,7 @@ def cambiar_estado_aviso(request, aviso_id):
         logger.error(f"Error al cambiar estado: {str(e)} - Usuario: {request.user.username}")
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'mensaje': 'Error al cambiar el estado'
-            }, status=500)
+            return JsonResponse({'success': False, 'mensaje': 'Error al cambiar el estado'}, status=500)
         else:
             messages.error(request, 'Error al cambiar el estado.')
             return redirect('aviso_detalle', pk=aviso_id)
@@ -596,10 +593,7 @@ def restaurar_aviso(request, aviso_id):
     """Vista para restaurar un aviso eliminado (solo admins)"""
     if not request.user.is_staff:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'mensaje': 'No tienes permisos para esta acción'
-            }, status=403)
+            return JsonResponse({'success': False, 'mensaje': 'No tienes permisos para esta acción'}, status=403)
         else:
             messages.error(request, 'No tienes permisos para esta acción.')
             return redirect('home')
@@ -613,10 +607,7 @@ def restaurar_aviso(request, aviso_id):
         logger.info(f"Aviso restaurado por admin {request.user.username}: {aviso.titulo} (ID: {aviso.id})")
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': True,
-                'mensaje': 'Aviso restaurado exitosamente'
-            })
+            return JsonResponse({'success': True, 'mensaje': 'Aviso restaurado exitosamente'})
         else:
             messages.success(request, 'Aviso restaurado exitosamente.')
             return redirect('aviso_detalle', pk=aviso_id)
@@ -625,10 +616,7 @@ def restaurar_aviso(request, aviso_id):
         logger.error(f"Error al restaurar aviso: {str(e)} - Usuario: {request.user.username}")
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'mensaje': 'Error interno del servidor'
-            }, status=500)
+            return JsonResponse({'success': False, 'mensaje': 'Error interno del servidor'}, status=500)
         else:
             messages.error(request, 'Error al restaurar el aviso.')
             return redirect('home')
@@ -652,17 +640,11 @@ def mis_avisos_estadisticas(request):
             }
         }
 
-        return JsonResponse({
-            'success': True,
-            'estadisticas': estadisticas
-        })
+        return JsonResponse({'success': True, 'estadisticas': estadisticas})
 
     except Exception as e:
         logger.error(f"Error al obtener estadísticas: {str(e)} - Usuario: {request.user.username}")
-        return JsonResponse({
-            'success': False,
-            'mensaje': 'Error al obtener estadísticas'
-        }, status=500)
+        return JsonResponse({'success': False, 'mensaje': 'Error al obtener estadísticas'}, status=500)
 
 @login_required
 @user_passes_test(is_admin)
@@ -674,7 +656,6 @@ def admin_dashboard(request):
 
     hace_24h = timezone.now() - timedelta(hours=24)
     hace_7d = timezone.now() - timedelta(days=7)
-    hace_30d = timezone.now() - timedelta(days=30)
 
     nuevos_usuarios_24h = User.objects.filter(date_joined__gte=hace_24h).count()
     nuevos_avisos_24h = Aviso.objects.filter(fecha_creacion__gte=hace_24h, activo=True).count()
@@ -688,9 +669,7 @@ def admin_dashboard(request):
     avisos_alta = Aviso.objects.filter(prioridad='alta', activo=True).count()
 
     avisos_recientes = Aviso.objects.filter(activo=True).order_by('-fecha_creacion')[:10]
-
     usuarios_recientes = User.objects.order_by('-date_joined')[:10]
-
     comentarios_recientes = Comentario.objects.filter(activo=True).order_by('-fecha_creacion')[:10]
 
     avisos_por_tipo = TipoAviso.objects.annotate(
@@ -701,22 +680,17 @@ def admin_dashboard(request):
         'total_usuarios': total_usuarios,
         'total_avisos': total_avisos,
         'total_comentarios': total_comentarios,
-
         'nuevos_usuarios_24h': nuevos_usuarios_24h,
         'nuevos_avisos_24h': nuevos_avisos_24h,
         'nuevos_avisos_7d': nuevos_avisos_7d,
-
         'avisos_activos': avisos_activos,
         'avisos_proceso': avisos_proceso,
         'avisos_resueltos': avisos_resueltos,
-
         'avisos_urgentes': avisos_urgentes,
         'avisos_alta': avisos_alta,
-
         'avisos_recientes': avisos_recientes,
         'usuarios_recientes': usuarios_recientes,
         'comentarios_recientes': comentarios_recientes,
-
         'avisos_por_tipo': avisos_por_tipo,
     }
 
@@ -747,7 +721,7 @@ def admin_avisos_list(request):
             Q(usuario__username__icontains=search)
         )
     if activo is not None:
-        avisos = avisos.filter(activo=activo == 'true')
+        avisos = avisos.filter(activo=(activo == 'true'))
 
     paginator = Paginator(avisos, 20)
     page_number = request.GET.get('page')
@@ -785,9 +759,9 @@ def admin_usuarios_list(request):
             Q(email__icontains=search)
         )
     if is_active is not None:
-        usuarios = usuarios.filter(is_active=is_active == 'true')
+        usuarios = usuarios.filter(is_active=(is_active == 'true'))
     if is_staff is not None:
-        usuarios = usuarios.filter(is_staff=is_staff == 'true')
+        usuarios = usuarios.filter(is_staff=(is_staff == 'true'))
 
     paginator = Paginator(usuarios, 20)
     page_number = request.GET.get('page')
@@ -820,7 +794,7 @@ def admin_comentarios_list(request):
             Q(aviso__titulo__icontains=search)
         )
     if activo is not None:
-        comentarios = comentarios.filter(activo=activo == 'true')
+        comentarios = comentarios.filter(activo=(activo == 'true'))
 
     paginator = Paginator(comentarios, 20)
     page_number = request.GET.get('page')
@@ -930,17 +904,20 @@ def admin_estadisticas(request):
 
     for i in range(12):
         fecha_inicio = timezone.now().replace(day=1) - timedelta(days=30*i)
-        fecha_fin = fecha_inicio + timedelta(days=31)
+        # Esto es una simplificación, para meses reales se usaría relativedelta
+        fecha_fin = fecha_inicio.replace(day=28) + timedelta(days=4)
+        fecha_fin = fecha_fin - timedelta(days=fecha_fin.day)
+
 
         avisos_mes = Aviso.objects.filter(
             fecha_creacion__gte=fecha_inicio,
-            fecha_creacion__lt=fecha_fin,
+            fecha_creacion__lt=fecha_fin.replace(day=1),
             activo=True
         ).count()
 
         usuarios_mes = User.objects.filter(
             date_joined__gte=fecha_inicio,
-            date_joined__lt=fecha_fin
+            date_joined__lt=fecha_fin.replace(day=1)
         ).count()
 
         avisos_por_mes.append({
