@@ -26,7 +26,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default-key-for-loc
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # On AWS, this environment variable should be set to 'False'.
-DEBUG = False
+DEBUG = True  # Temporarily set to True for debugging CSRF issues
 
 # Set this to your actual domain name(s) in production.
 # Example: ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'www.mysite.com,mysite.com').split(',')
@@ -175,6 +175,11 @@ SESSION_COOKIE_SECURE = not DEBUG # Becomes True when DEBUG is False
 CSRF_COOKIE_SECURE = not DEBUG    # Becomes True when DEBUG is False
 SESSION_COOKIE_HTTPONLY = True    # Default, but good to be explicit
 CSRF_COOKIE_HTTPONLY = False      # Default is False, which is correct
+
+# CSRF Settings for development
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF
+CSRF_COOKIE_SAMESITE = 'Lax'  # Allow CSRF cookies in same-site requests
 
 # Optional but Recommended for stronger HTTPS enforcement
 # SECURE_SSL_REDIRECT = True
