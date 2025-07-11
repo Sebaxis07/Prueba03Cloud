@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.auth.views import LoginView, LogoutView
 
 # CORRECCIÓN: Se importa el decorador correcto.
-from ratelimit.decorators import ratelimit
+from ratelimit.decorators import RateLimitDecorator
 
 from avisos.authentication import User
 from .forms import RegistroForm, LoginForm, AvisoForm, ComentarioForm, BusquedaForm, DetalleAsaltoForm, PerfilUsuarioForm
@@ -65,7 +65,7 @@ def home(request):
     return render(request, 'Home.html', context)
 
 # CORRECCIÓN: Se aplica el decorador con la sintaxis correcta.
-@ratelimit(key='ip', rate='5/h', block=True) # 5 registros por hora desde la misma IP
+@RateLimitDecorator(calls=5, period=3600) # 5 registros por hora desde la misma IP
 @csrf_protect
 def registro(request):
     """Vista de registro de usuarios con validaciones de seguridad"""
@@ -102,7 +102,7 @@ def registro(request):
     return render(request, 'register.html', {'form': form})
 
 # CORRECCIÓN: Se aplica el decorador con la sintaxis correcta para vistas de clase.
-@method_decorator(ratelimit(key='ip', rate='10/m', block=True), name='dispatch') # 10 intentos por minuto
+@method_decorator(RateLimitDecorator(calls=10, period=600), name='dispatch') # 10 intentos por minuto
 class CustomLoginView(LoginView):
     form_class = LoginForm
     template_name = 'Login.html'
