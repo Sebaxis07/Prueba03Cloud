@@ -3,10 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob:; font-src 'self' https://cdn.tailwindcss.com; connect-src 'self'; frame-ancestors 'none';">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <title>Gestión de Avisos - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
+        // Sanitize function to prevent XSS
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Secure innerHTML usage
+        function setSecureInnerHTML(element, content) {
+            if (element && content) {
+                element.textContent = content;
+            }
+        }
+        
+        // Secure DOM manipulation
+        function createSecureElement(tag, className, textContent) {
+            const element = document.createElement(tag);
+            if (className) element.className = className;
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+        
+        // Validate and sanitize user input
+        function validateInput(input, maxLength = 1000) {
+            if (typeof input !== 'string') return '';
+            return input.substring(0, maxLength).replace(/[<>]/g, '');
+        }
+        
+        // Secure JSON parsing
+        function safeJSONParse(str) {
+            try {
+                return JSON.parse(str);
+            } catch (e) {
+                console.error('Invalid JSON:', e);
+                return null;
+            }
+        }
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -101,7 +147,7 @@
                 
                 <div class="flex items-center space-x-4">
                     <div class="text-sm text-gray-300">
-                        <span class="font-medium text-white">{{ user.get_full_name|default:user.username }}</span>
+                        <span class="font-medium text-white">{{ user.get_full_name|default:user.username|escape|escape }}</span>
                         <div class="text-xs text-costa-green">Administrador</div>
                     </div>
                 </div>
@@ -118,7 +164,7 @@
                 <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                     {% csrf_token %}
                     <div>
-                        <input type="text" name="search" placeholder="Buscar..." value="{{ current_filters.search|default:'' }}" 
+                        <input type="text" name="search" placeholder="Buscar..." value="{{ current_filters.search|default:''|escape|escape }}" 
                                class="w-full px-4 py-2 bg-costa-gray-dark border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-costa-green focus:border-transparent">
                     </div>
                     
@@ -145,7 +191,7 @@
                         <select name="tipo" class="w-full px-4 py-2 bg-costa-gray-dark border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-costa-green focus:border-transparent">
                             <option value="">Todos los tipos</option>
                             {% for tipo in tipos %}
-                                <option value="{{ tipo.id }}" {% if current_filters.tipo|add:"0" == tipo.id %}selected{% endif %}>{{ tipo.get_nombre_display }}</option>
+                                <option value="{{ tipo.id|escape|escape }}" {% if current_filters.tipo|add:"0" == tipo.id %}selected{% endif %}>{{ tipo.get_nombre_display|escape|escape }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -175,7 +221,7 @@
                 <div class="px-6 py-4 border-b border-costa-green/20">
                     <h2 class="text-lg font-semibold text-white flex items-center">
                         <i data-lucide="list" class="h-5 w-5 mr-2 text-costa-green"></i>
-                        Avisos ({{ avisos|length }} resultados)
+                        Avisos ({{ avisos|length|escape|escape }} resultados)
                     </h2>
                 </div>
                 
@@ -200,8 +246,8 @@
                                             <i data-lucide="alert-triangle" class="h-4 w-4 {% if aviso.prioridad == 'urgente' %}text-red-400{% elif aviso.prioridad == 'alta' %}text-orange-400{% else %}text-costa-green{% endif %}"></i>
                                         </div>
                                         <div>
-                                            <p class="text-sm font-medium text-white">{{ aviso.titulo|truncatechars:50 }}</p>
-                                            <p class="text-xs text-gray-400">{{ aviso.tipo.get_nombre_display }}</p>
+                                            <p class="text-sm font-medium text-white">{{ aviso.titulo|truncatechars:50|escape|escape }}</p>
+                                            <p class="text-xs text-gray-400">{{ aviso.tipo.get_nombre_display|escape|escape }}</p>
                                             {% if not aviso.activo %}
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500/20 text-red-400 mt-1">
                                                     Inactivo
@@ -211,21 +257,21 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-white">{{ aviso.usuario.get_full_name|default:aviso.usuario.username }}</div>
-                                    <div class="text-xs text-gray-400">{{ aviso.usuario.username }}</div>
+                                    <div class="text-sm text-white">{{ aviso.usuario.get_full_name|default:aviso.usuario.username|escape|escape }}</div>
+                                    <div class="text-xs text-gray-400">{{ aviso.usuario.username|escape|escape }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {% if aviso.status == 'activo' %}bg-red-500/20 text-red-400{% elif aviso.status == 'en_proceso' %}bg-yellow-500/20 text-yellow-400{% else %}bg-costa-green/20 text-costa-green{% endif %}">
-                                        {{ aviso.get_status_display }}
+                                        {{ aviso.get_status_display|escape|escape }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {% if aviso.prioridad == 'urgente' %}bg-red-500/20 text-red-400{% elif aviso.prioridad == 'alta' %}bg-orange-500/20 text-orange-400{% elif aviso.prioridad == 'media' %}bg-yellow-500/20 text-yellow-400{% else %}bg-gray-500/20 text-gray-400{% endif %}">
-                                        {{ aviso.get_prioridad_display }}
+                                        {{ aviso.get_prioridad_display|escape|escape }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-300">
-                                    {{ aviso.fecha_creacion|date:"d/m/Y H:i" }}
+                                    {{ aviso.fecha_creacion|date:"d/m/Y H:i"|escape|escape }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center space-x-2">
@@ -233,7 +279,7 @@
                                             <i data-lucide="eye" class="h-4 w-4"></i>
                                         </a>
                                         
-                                        <button onclick="toggleAviso({{ aviso.id }})" class="{% if aviso.activo %}text-red-400 hover:text-red-300{% else %}text-green-400 hover:text-green-300{% endif %} transition-colors" title="{% if aviso.activo %}Desactivar{% else %}Activar{% endif %}">
+                                        <button onclick="toggleAviso({{ aviso.id|escape|escape }})" class="{% if aviso.activo %}text-red-400 hover:text-red-300{% else %}text-green-400 hover:text-green-300{% endif %} transition-colors" title="{% if aviso.activo %}Desactivar{% else %}Activar{% endif %}">
                                             <i data-lucide="{% if aviso.activo %}eye-off{% else %}eye{% endif %}" class="h-4 w-4"></i>
                                         </button>
                                         
@@ -243,9 +289,9 @@
                                             </button>
                                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 glassmorphism rounded-lg shadow-lg z-10" style="display: none;">
                                                 <div class="py-1">
-                                                    <button onclick="cambiarEstado({{ aviso.id }}, 'activo')" class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10">Activo</button>
-                                                    <button onclick="cambiarEstado({{ aviso.id }}, 'en_proceso')" class="block w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-white/10">En Proceso</button>
-                                                    <button onclick="cambiarEstado({{ aviso.id }}, 'resuelto')" class="block w-full text-left px-4 py-2 text-sm text-costa-green hover:bg-white/10">Resuelto</button>
+                                                    <button onclick="cambiarEstado({{ aviso.id|escape|escape }}, 'activo')" class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10">Activo</button>
+                                                    <button onclick="cambiarEstado({{ aviso.id|escape|escape }}, 'en_proceso')" class="block w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-white/10">En Proceso</button>
+                                                    <button onclick="cambiarEstado({{ aviso.id|escape|escape }}, 'resuelto')" class="block w-full text-left px-4 py-2 text-sm text-costa-green hover:bg-white/10">Resuelto</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -270,22 +316,22 @@
                 <div class="px-6 py-4 border-t border-gray-700">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-400">
-                            Mostrando {{ avisos.start_index }} - {{ avisos.end_index }} de {{ avisos.paginator.count }} resultados
+                            Mostrando {{ avisos.start_index|escape|escape }} - {{ avisos.end_index|escape|escape }} de {{ avisos.paginator.count|escape|escape }} resultados
                         </div>
                         <div class="flex space-x-2">
                             {% if avisos.has_previous %}
-                                <a href="?page={{ avisos.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.activo %}&activo={{ request.GET.activo }}{% endif %}" 
+                                <a href="?page={{ avisos.previous_page_number|escape|escape }}{% if request.GET.search %}&search={{ request.GET.search|escape|escape }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status|escape|escape }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad|escape|escape }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo|escape|escape }}{% endif %}{% if request.GET.activo %}&activo={{ request.GET.activo|escape|escape }}{% endif %}" 
                                    class="glassmorphism border border-gray-600 text-gray-300 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:text-white hover:bg-white/10">
                                     <i data-lucide="chevron-left" class="h-4 w-4"></i>
                                 </a>
                             {% endif %}
                             
                             <span class="glassmorphism border border-costa-green/50 text-costa-green px-3 py-2 rounded-lg font-medium">
-                                {{ avisos.number }}
+                                {{ avisos.number|escape|escape }}
                             </span>
                             
                             {% if avisos.has_next %}
-                                <a href="?page={{ avisos.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.activo %}&activo={{ request.GET.activo }}{% endif %}" 
+                                <a href="?page={{ avisos.next_page_number|escape|escape }}{% if request.GET.search %}&search={{ request.GET.search|escape|escape }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status|escape|escape }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad|escape|escape }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo|escape|escape }}{% endif %}{% if request.GET.activo %}&activo={{ request.GET.activo|escape|escape }}{% endif %}" 
                                    class="glassmorphism border border-gray-600 text-gray-300 px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:text-white hover:bg-white/10">
                                     <i data-lucide="chevron-right" class="h-4 w-4"></i>
                                 </a>

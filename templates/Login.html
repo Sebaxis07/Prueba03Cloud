@@ -3,10 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob:; font-src 'self' https://cdn.tailwindcss.com; connect-src 'self'; frame-ancestors 'none';">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <title>Iniciar Sesión - Costa Laguna Segura</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
+        // Sanitize function to prevent XSS
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Secure innerHTML usage
+        function setSecureInnerHTML(element, content) {
+            if (element && content) {
+                element.textContent = content;
+            }
+        }
+        
+        // Secure DOM manipulation
+        function createSecureElement(tag, className, textContent) {
+            const element = document.createElement(tag);
+            if (className) element.className = className;
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+        
+        // Validate and sanitize user input
+        function validateInput(input, maxLength = 1000) {
+            if (typeof input !== 'string') return '';
+            return input.substring(0, maxLength).replace(/[<>]/g, '');
+        }
+        
+        // Secure JSON parsing
+        function safeJSONParse(str) {
+            try {
+                return JSON.parse(str);
+            } catch (e) {
+                console.error('Invalid JSON:', e);
+                return null;
+            }
+        }
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -172,7 +218,7 @@
                                    class="h-5 w-5 {% if message.tags == 'error' %}text-red-400{% else %}text-green-400{% endif %}"></i>
                             </div>
                             <span class="{% if message.tags == 'error' %}text-red-300{% else %}text-green-300{% endif %} font-medium">
-                                {{ message }}
+                                {{ message|escape|escape }}
                             </span>
                         </div>
                     </div>
@@ -184,7 +230,7 @@
                     {% csrf_token %}
                     
                     <div class="relative">
-                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                        <label for="{{ form.username.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
                                 <i data-lucide="user" class="h-4 w-4 text-costa-green"></i>
                             </div>
@@ -192,8 +238,8 @@
                         </label>
                         <div class="relative">
                             <input type="text" 
-                                   name="{{ form.username.name }}" 
-                                   id="{{ form.username.id_for_label }}"
+                                   name="{{ form.username.name|escape|escape }}" 
+                                   id="{{ form.username.id_for_label|escape|escape }}"
                                    class="form-input pl-12 pr-20"
                                    placeholder="Ingresa tu usuario o RUT"
                                    autocomplete="username"
@@ -208,7 +254,7 @@
                         {% if form.username.errors %}
                             <p class="mt-2 text-sm text-red-400 flex items-center glassmorphism-light p-2 rounded-lg">
                                 <i data-lucide="alert-circle" class="h-4 w-4 mr-2"></i>
-                                {{ form.username.errors.0 }}
+                                {{ form.username.errors.0|escape|escape }}
                             </p>
                         {% endif %}
                         <p class="mt-1 text-xs text-gray-400">
@@ -217,7 +263,7 @@
                     </div>
 
                     <div class="relative">
-                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                        <label for="{{ form.password.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <div class="p-1 bg-costa-green/20 rounded mr-2">
                                 <i data-lucide="lock" class="h-4 w-4 text-costa-green"></i>
                             </div>
@@ -225,8 +271,8 @@
                         </label>
                         <div class="relative">
                             <input type="password" 
-                                   name="{{ form.password.name }}" 
-                                   id="{{ form.password.id_for_label }}"
+                                   name="{{ form.password.name|escape|escape }}" 
+                                   id="{{ form.password.id_for_label|escape|escape }}"
                                    class="form-input pl-12 pr-12"
                                    placeholder="Ingresa tu contraseña"
                                    autocomplete="current-password"
@@ -241,7 +287,7 @@
                         {% if form.password.errors %}
                             <p class="mt-2 text-sm text-red-400 flex items-center glassmorphism-light p-2 rounded-lg">
                                 <i data-lucide="alert-circle" class="h-4 w-4 mr-2"></i>
-                                {{ form.password.errors.0 }}
+                                {{ form.password.errors.0|escape|escape }}
                             </p>
                         {% endif %}
                     </div>
@@ -254,7 +300,7 @@
                                 </div>
                                 <div class="text-red-300">
                                     {% for error in form.non_field_errors %}
-                                        <p class="font-medium">{{ error }}</p>
+                                        <p class="font-medium">{{ error|escape|escape }}</p>
                                     {% endfor %}
                                 </div>
                             </div>

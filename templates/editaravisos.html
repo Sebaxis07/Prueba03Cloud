@@ -3,10 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob:; font-src 'self' https://cdn.tailwindcss.com; connect-src 'self'; frame-ancestors 'none';">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <title>Editar Aviso - Costa Laguna Segura</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
+        // Sanitize function to prevent XSS
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Secure innerHTML usage
+        function setSecureInnerHTML(element, content) {
+            if (element && content) {
+                element.textContent = content;
+            }
+        }
+        
+        // Secure DOM manipulation
+        function createSecureElement(tag, className, textContent) {
+            const element = document.createElement(tag);
+            if (className) element.className = className;
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+        
+        // Validate and sanitize user input
+        function validateInput(input, maxLength = 1000) {
+            if (typeof input !== 'string') return '';
+            return input.substring(0, maxLength).replace(/[<>]/g, '');
+        }
+        
+        // Secure JSON parsing
+        function safeJSONParse(str) {
+            try {
+                return JSON.parse(str);
+            } catch (e) {
+                console.error('Invalid JSON:', e);
+                return null;
+            }
+        }
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -285,12 +331,12 @@
                             <!-- User Avatar with Photo Support -->
                             <div class="user-avatar">
                                 {% if user.perfilusuario and user.perfilusuario.foto_perfil %}
-                                    <img src="{{ user.perfilusuario.foto_perfil.url }}" 
-                                         alt="{{ user.get_full_name|default:user.username }}"
+                                    <img src="{{ user.perfilusuario.foto_perfil.url|escape|escape }}" 
+                                         alt="{{ user.get_full_name|default:user.username|escape|escape }}"
                                          class="w-10 h-10 rounded-xl object-cover border-2 border-costa-green/30">
                                 {% else %}
                                     <div class="w-10 h-10 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                                        {% if user.first_name %}{{ user.first_name.0|upper }}{% elif user.username %}{{ user.username.0|upper }}{% else %}U{% endif %}
+                                        {% if user.first_name %}{{ user.first_name.0|upper|escape|escape }}{% elif user.username %}{{ user.username.0|upper|escape|escape }}{% else %}U{% endif %}
                                     </div>
                                 {% endif %}
                                 <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-costa-green rounded-full border-2 border-costa-black flex items-center justify-center">
@@ -300,7 +346,7 @@
                             
                             <div class="hidden lg:block text-left">
                                 <p class="text-sm font-semibold text-white group-hover:text-costa-green transition-colors">
-                                    {{ user.get_full_name|default:user.username }}
+                                    {{ user.get_full_name|default:user.username|escape|escape }}
                                 </p>
                                 <p class="text-xs text-gray-400">
                                     {% if user.is_staff %}Admin{% else %}Usuario{% endif %}
@@ -316,17 +362,17 @@
                             <div class="px-6 py-4 border-b border-costa-green/20 bg-gradient-to-r from-costa-green/10 to-costa-cyan/10">
                                 <div class="flex items-center space-x-3">
                                     {% if user.perfilusuario and user.perfilusuario.foto_perfil %}
-                                        <img src="{{ user.perfilusuario.foto_perfil.url }}" 
-                                             alt="{{ user.get_full_name|default:user.username }}"
+                                        <img src="{{ user.perfilusuario.foto_perfil.url|escape|escape }}" 
+                                             alt="{{ user.get_full_name|default:user.username|escape|escape }}"
                                              class="w-12 h-12 rounded-xl object-cover border-2 border-costa-green/50">
                                     {% else %}
                                         <div class="w-12 h-12 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                                            {% if user.first_name %}{{ user.first_name.0|upper }}{% elif user.username %}{{ user.username.0|upper }}{% else %}U{% endif %}
+                                            {% if user.first_name %}{{ user.first_name.0|upper|escape|escape }}{% elif user.username %}{{ user.username.0|upper|escape|escape }}{% else %}U{% endif %}
                                         </div>
                                     {% endif %}
                                     <div>
-                                        <p class="text-sm font-semibold text-white">{{ user.get_full_name|default:user.username }}</p>
-                                        <p class="text-xs text-costa-green">{{ user.email }}</p>
+                                        <p class="text-sm font-semibold text-white">{{ user.get_full_name|default:user.username|escape|escape }}</p>
+                                        <p class="text-xs text-costa-green">{{ user.email|escape|escape }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -420,17 +466,17 @@
                 <div class="px-6 py-4 bg-gradient-to-r from-costa-green/10 to-costa-cyan/10 border-b border-costa-green/20">
                     <div class="flex items-center space-x-3">
                         {% if user.perfilusuario and user.perfilusuario.foto_perfil %}
-                            <img src="{{ user.perfilusuario.foto_perfil.url }}" 
-                                 alt="{{ user.get_full_name|default:user.username }}"
+                            <img src="{{ user.perfilusuario.foto_perfil.url|escape|escape }}" 
+                                 alt="{{ user.get_full_name|default:user.username|escape|escape }}"
                                  class="w-12 h-12 rounded-xl object-cover border-2 border-costa-green/50">
                         {% else %}
                             <div class="w-12 h-12 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold">
-                                {% if user.first_name %}{{ user.first_name.0|upper }}{% elif user.username %}{{ user.username.0|upper }}{% else %}U{% endif %}
+                                {% if user.first_name %}{{ user.first_name.0|upper|escape|escape }}{% elif user.username %}{{ user.username.0|upper|escape|escape }}{% else %}U{% endif %}
                             </div>
                         {% endif %}
                         <div>
-                            <div class="text-base font-semibold text-white">{{ user.get_full_name|default:user.username }}</div>
-                            <div class="text-sm font-medium text-gray-400">{{ user.email }}</div>
+                            <div class="text-base font-semibold text-white">{{ user.get_full_name|default:user.username|escape|escape }}</div>
+                            <div class="text-sm font-medium text-gray-400">{{ user.email|escape|escape }}</div>
                         </div>
                     </div>
                 </div>
@@ -514,7 +560,7 @@
                 <div class="mb-4 p-4 rounded-xl animate-slide-up shadow-lg {% if message.tags == 'error' %}bg-red-900/20 text-red-300 border border-red-500/30{% elif message.tags == 'success' %}bg-green-900/20 text-green-300 border border-green-500/30{% elif message.tags == 'warning' %}bg-yellow-900/20 text-yellow-300 border border-yellow-500/30{% else %}bg-blue-900/20 text-blue-300 border border-blue-500/30{% endif %} backdrop-blur-sm">
                     <div class="flex items-center">
                         <i data-lucide="{% if message.tags == 'error' %}alert-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="h-5 w-5 mr-3 animate-pulse"></i>
-                        <span class="font-medium">{{ message }}</span>
+                        <span class="font-medium">{{ message|escape|escape }}</span>
                     </div>
                 </div>
             {% endfor %}
@@ -547,26 +593,26 @@
                 <div class="flex items-start justify-between">
                     <div>
                         <div class="flex items-center space-x-3 mb-4">
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r {{ object.get_prioridad_bg_color }} text-white shadow-lg">
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r {{ object.get_prioridad_bg_color|escape|escape }} text-white shadow-lg">
                                 <i data-lucide="alert-triangle" class="h-4 w-4 mr-2"></i>
-                                {{ object.get_prioridad_display }}
+                                {{ object.get_prioridad_display|escape|escape }}
                             </span>
                             <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-costa-green to-costa-green-light text-white shadow-lg">
                                 <i data-lucide="tag" class="h-4 w-4 mr-2"></i>
-                                {{ object.get_tipo_display }}
+                                {{ object.get_tipo_display|escape|escape }}
                             </span>
                         </div>
                         <div class="text-blue-100 space-y-2">
                             <p class="flex items-center">
                                 <i data-lucide="calendar" class="h-4 w-4 mr-2 text-blue-300"></i>
                                 <span class="font-medium">Creado:</span>
-                                <span class="ml-2">{{ object.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                                <span class="ml-2">{{ object.fecha_creacion|date:"d/m/Y H:i"|escape|escape }}</span>
                             </p>
                             {% if object.fecha_actualizacion != object.fecha_creacion %}
                             <p class="flex items-center">
                                 <i data-lucide="edit" class="h-4 w-4 mr-2 text-blue-300"></i>
                                 <span class="font-medium">Última actualización:</span>
-                                <span class="ml-2">{{ object.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+                                <span class="ml-2">{{ object.fecha_actualizacion|date:"d/m/Y H:i"|escape|escape }}</span>
                             </p>
                             {% endif %}
                         </div>
@@ -583,15 +629,15 @@
                 
                 <!-- Título -->
                 <div class="animate-slide-up">
-                    <label for="{{ form.titulo.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                    <label for="{{ form.titulo.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                         <i data-lucide="type" class="h-5 w-5 mr-2 text-costa-green"></i>
                         Título del Aviso *
                     </label>
-                    {{ form.titulo }}
+                    {{ form.titulo|escape|escape }}
                     {% if form.titulo.errors %}
                         <p class="mt-2 text-sm text-red-400 flex items-center">
                             <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                            {{ form.titulo.errors.0 }}
+                            {{ form.titulo.errors.0|escape|escape }}
                         </p>
                     {% endif %}
                     <p class="mt-2 text-xs text-gray-400">Describe brevemente el incidente (5-200 caracteres)</p>
@@ -600,29 +646,29 @@
                 <!-- Tipo y Prioridad -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up" style="animation-delay: 0.1s;">
                     <div class="glassmorphism-light p-6 rounded-xl card-hover">
-                        <label for="{{ form.tipo.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                        <label for="{{ form.tipo.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <i data-lucide="tag" class="h-5 w-5 mr-2 text-costa-green"></i>
                             Tipo de Aviso *
                         </label>
-                        {{ form.tipo }}
+                        {{ form.tipo|escape|escape }}
                         {% if form.tipo.errors %}
                             <p class="mt-2 text-sm text-red-400 flex items-center">
                                 <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                                {{ form.tipo.errors.0 }}
+                                {{ form.tipo.errors.0|escape|escape }}
                             </p>
                         {% endif %}
                     </div>
                     
                     <div class="glassmorphism-light p-6 rounded-xl card-hover">
-                        <label for="{{ form.prioridad.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                        <label for="{{ form.prioridad.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <i data-lucide="alert-triangle" class="h-5 w-5 mr-2 text-costa-green"></i>
                             Prioridad *
                         </label>
-                        {{ form.prioridad }}
+                        {{ form.prioridad|escape|escape }}
                         {% if form.prioridad.errors %}
                             <p class="mt-2 text-sm text-red-400 flex items-center">
                                 <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                                {{ form.prioridad.errors.0 }}
+                                {{ form.prioridad.errors.0|escape|escape }}
                             </p>
                         {% endif %}
                     </div>
@@ -630,15 +676,15 @@
 
                 <!-- Descripción -->
                 <div class="animate-slide-up" style="animation-delay: 0.2s;">
-                    <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                    <label for="{{ form.descripcion.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                         <i data-lucide="file-text" class="h-5 w-5 mr-2 text-costa-green"></i>
                         Descripción Detallada *
                     </label>
-                    {{ form.descripcion }}
+                    {{ form.descripcion|escape|escape }}
                     {% if form.descripcion.errors %}
                         <p class="mt-2 text-sm text-red-400 flex items-center">
                             <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                            {{ form.descripcion.errors.0 }}
+                            {{ form.descripcion.errors.0|escape|escape }}
                         </p>
                     {% endif %}
                     <p class="mt-2 text-xs text-gray-400">
@@ -654,28 +700,28 @@
                     </h3>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
-                            <label for="{{ form.direccion.id_for_label }}" class="block text-sm font-medium text-white mb-3">
+                            <label for="{{ form.direccion.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3">
                                 Dirección Exacta *
                             </label>
-                            {{ form.direccion }}
+                            {{ form.direccion|escape|escape }}
                             {% if form.direccion.errors %}
                                 <p class="mt-2 text-sm text-red-400 flex items-center">
                                     <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                                    {{ form.direccion.errors.0 }}
+                                    {{ form.direccion.errors.0|escape|escape }}
                                 </p>
                             {% endif %}
                             <p class="mt-2 text-xs text-gray-400">Incluye número de casa/departamento</p>
                         </div>
                         
                         <div>
-                            <label for="{{ form.sector.id_for_label }}" class="block text-sm font-medium text-white mb-3">
+                            <label for="{{ form.sector.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3">
                                 Sector *
                             </label>
-                            {{ form.sector }}
+                            {{ form.sector|escape|escape }}
                             {% if form.sector.errors %}
                                 <p class="mt-2 text-sm text-red-400 flex items-center">
                                     <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                                    {{ form.sector.errors.0 }}
+                                    {{ form.sector.errors.0|escape|escape }}
                                 </p>
                             {% endif %}
                             <p class="mt-2 text-xs text-gray-400">Especifica manzana, block o referencia</p>
@@ -686,22 +732,22 @@
                 <!-- Información de contacto e imagen -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up" style="animation-delay: 0.4s;">
                     <div class="glassmorphism-light p-6 rounded-xl">
-                        <label for="{{ form.telefono_contacto.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                        <label for="{{ form.telefono_contacto.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <i data-lucide="phone" class="h-5 w-5 mr-2 text-costa-green"></i>
                             Teléfono de Contacto
                         </label>
-                        {{ form.telefono_contacto }}
+                        {{ form.telefono_contacto|escape|escape }}
                         {% if form.telefono_contacto.errors %}
                             <p class="mt-2 text-sm text-red-400 flex items-center">
                                 <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                                {{ form.telefono_contacto.errors.0 }}
+                                {{ form.telefono_contacto.errors.0|escape|escape }}
                             </p>
                         {% endif %}
                         <p class="mt-2 text-xs text-gray-400">Opcional - Para que otros puedan contactarte directamente</p>
                     </div>
                     
                     <div class="glassmorphism-light p-6 rounded-xl">
-                        <label for="{{ form.imagen.id_for_label }}" class="block text-sm font-medium text-white mb-3 flex items-center">
+                        <label for="{{ form.imagen.id_for_label|escape|escape }}" class="block text-sm font-medium text-white mb-3 flex items-center">
                             <i data-lucide="image" class="h-5 w-5 mr-2 text-costa-green"></i>
                             Imagen del Incidente
                         </label>
@@ -709,7 +755,7 @@
                         {% if object.imagen %}
                             <div class="mb-4 p-3 bg-costa-gray-dark/50 rounded-lg border border-costa-green/20">
                                 <div class="flex items-start space-x-3">
-                                    <img src="{{ object.imagen.url }}" alt="Imagen actual" class="h-16 w-16 object-cover rounded-lg border border-costa-green/30 shadow-lg">
+                                    <img src="{{ object.imagen.url|escape|escape }}" alt="Imagen actual" class="h-16 w-16 object-cover rounded-lg border border-costa-green/30 shadow-lg">
                                     <div class="flex-1">
                                         <p class="text-sm font-medium text-white">Imagen actual</p>
                                         <p class="text-xs text-gray-400 mt-1">Selecciona una nueva imagen para reemplazarla</p>
@@ -718,11 +764,11 @@
                             </div>
                         {% endif %}
                         
-                        {{ form.imagen }}
+                        {{ form.imagen|escape|escape }}
                         {% if form.imagen.errors %}
                             <p class="mt-2 text-sm text-red-400 flex items-center">
                                 <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                                {{ form.imagen.errors.0 }}
+                                {{ form.imagen.errors.0|escape|escape }}
                             </p>
                         {% endif %}
                         <p class="mt-2 text-xs text-gray-400">
@@ -739,10 +785,10 @@
                     </h3>
                     <div class="flex items-start space-x-3">
                         <div class="checkbox-container">
-                            {{ form.es_anonimo }}
+                            {{ form.es_anonimo|escape|escape }}
                         </div>
                         <div>
-                            <label for="{{ form.es_anonimo.id_for_label }}" class="text-sm text-white font-medium cursor-pointer">
+                            <label for="{{ form.es_anonimo.id_for_label|escape|escape }}" class="text-sm text-white font-medium cursor-pointer">
                                 Publicar de forma anónima
                             </label>
                             <p class="text-xs text-gray-400 mt-1">
@@ -753,7 +799,7 @@
                     {% if form.es_anonimo.errors %}
                         <p class="mt-2 text-sm text-red-400 flex items-center">
                             <i data-lucide="alert-circle" class="h-4 w-4 mr-1"></i>
-                            {{ form.es_anonimo.errors.0 }}
+                            {{ form.es_anonimo.errors.0|escape|escape }}
                         </p>
                     {% endif %}
                 </div>
@@ -765,7 +811,7 @@
                             <i data-lucide="alert-triangle" class="h-5 w-5 mr-3 mt-0.5 text-red-400"></i>
                             <div>
                                 {% for error in form.non_field_errors %}
-                                    <p class="font-medium">{{ error }}</p>
+                                    <p class="font-medium">{{ error|escape|escape }}</p>
                                 {% endfor %}
                             </div>
                         </div>

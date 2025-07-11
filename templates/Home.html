@@ -3,10 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob:; font-src 'self' https://cdn.tailwindcss.com; connect-src 'self'; frame-ancestors 'none';">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
     <title>Costa Laguna Segura - Sistema de Avisos de Seguridad</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
+        // Sanitize function to prevent XSS
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Secure innerHTML usage
+        function setSecureInnerHTML(element, content) {
+            if (element && content) {
+                element.textContent = content;
+            }
+        }
+        
+        // Secure DOM manipulation
+        function createSecureElement(tag, className, textContent) {
+            const element = document.createElement(tag);
+            if (className) element.className = className;
+            if (textContent) element.textContent = textContent;
+            return element;
+        }
+        
+        // Validate and sanitize user input
+        function validateInput(input, maxLength = 1000) {
+            if (typeof input !== 'string') return '';
+            return input.substring(0, maxLength).replace(/[<>]/g, '');
+        }
+        
+        // Secure JSON parsing
+        function safeJSONParse(str) {
+            try {
+                return JSON.parse(str);
+            } catch (e) {
+                console.error('Invalid JSON:', e);
+                return null;
+            }
+        }
+        
         tailwind.config = {
             theme: {
                 extend: {
@@ -207,12 +253,12 @@
                             <!-- User Avatar with Photo Support -->
                             <div class="user-avatar">
                                 {% if user.perfilusuario and user.perfilusuario.foto_perfil %}
-                                    <img src="{{ user.perfilusuario.foto_perfil.url }}" 
-                                         alt="{{ user.get_full_name|default:user.username }}"
+                                    <img src="{{ user.perfilusuario.foto_perfil.url|escape|escape }}" 
+                                         alt="{{ user.get_full_name|default:user.username|escape|escape }}"
                                          class="w-10 h-10 rounded-xl object-cover border-2 border-costa-green/30">
                                 {% else %}
                                     <div class="w-10 h-10 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                                        {% if user.first_name %}{{ user.first_name.0|upper }}{% elif user.username %}{{ user.username.0|upper }}{% else %}U{% endif %}
+                                        {% if user.first_name %}{{ user.first_name.0|upper|escape|escape }}{% elif user.username %}{{ user.username.0|upper|escape|escape }}{% else %}U{% endif %}
                                     </div>
                                 {% endif %}
                                 <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-costa-green rounded-full border-2 border-costa-black flex items-center justify-center">
@@ -222,7 +268,7 @@
                             
                             <div class="hidden lg:block text-left">
                                 <p class="text-sm font-semibold text-white group-hover:text-costa-green transition-colors">
-                                    {{ user.get_full_name|default:user.username }}
+                                    {{ user.get_full_name|default:user.username|escape|escape|escape }}
                                 </p>
                                 <p class="text-xs text-gray-400">
                                     {% if user.is_staff %}Admin{% else %}Usuario{% endif %}
@@ -238,17 +284,17 @@
                             <div class="px-6 py-4 border-b border-costa-green/20 bg-gradient-to-r from-costa-green/10 to-costa-cyan/10">
                                 <div class="flex items-center space-x-3">
                                     {% if user.perfilusuario and user.perfilusuario.foto_perfil %}
-                                        <img src="{{ user.perfilusuario.foto_perfil.url }}" 
-                                             alt="{{ user.get_full_name|default:user.username }}"
+                                        <img src="{{ user.perfilusuario.foto_perfil.url|escape|escape }}" 
+                                             alt="{{ user.get_full_name|default:user.username|escape|escape }}"
                                              class="w-12 h-12 rounded-xl object-cover border-2 border-costa-green/50">
                                     {% else %}
                                         <div class="w-12 h-12 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                                            {% if user.first_name %}{{ user.first_name.0|upper }}{% elif user.username %}{{ user.username.0|upper }}{% else %}U{% endif %}
+                                            {% if user.first_name %}{{ user.first_name.0|upper|escape|escape }}{% elif user.username %}{{ user.username.0|upper|escape|escape }}{% else %}U{% endif %}
                                         </div>
                                     {% endif %}
                                     <div>
-                                        <p class="text-sm font-semibold text-white">{{ user.get_full_name|default:user.username }}</p>
-                                        <p class="text-xs text-costa-green">{{ user.email }}</p>
+                                        <p class="text-sm font-semibold text-white">{{ user.get_full_name|default:user.username|escape|escape|escape }}</p>
+                                        <p class="text-xs text-costa-green">{{ user.email|escape|escape|escape }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -341,17 +387,17 @@
                 <div class="px-6 py-4 bg-gradient-to-r from-costa-green/10 to-costa-cyan/10 border-b border-costa-green/20">
                     <div class="flex items-center space-x-3">
                         {% if user.perfilusuario and user.perfilusuario.foto_perfil %}
-                            <img src="{{ user.perfilusuario.foto_perfil.url }}" 
-                                 alt="{{ user.get_full_name|default:user.username }}"
+                            <img src="{{ user.perfilusuario.foto_perfil.url|escape|escape }}" 
+                                 alt="{{ user.get_full_name|default:user.username|escape|escape }}"
                                  class="w-12 h-12 rounded-xl object-cover border-2 border-costa-green/50">
                         {% else %}
                             <div class="w-12 h-12 bg-gradient-to-br from-costa-green via-costa-cyan to-costa-purple rounded-xl flex items-center justify-center text-white font-bold">
-                                {% if user.first_name %}{{ user.first_name.0|upper }}{% elif user.username %}{{ user.username.0|upper }}{% else %}U{% endif %}
+                                {% if user.first_name %}{{ user.first_name.0|upper|escape|escape }}{% elif user.username %}{{ user.username.0|upper|escape|escape }}{% else %}U{% endif %}
                             </div>
                         {% endif %}
                         <div>
-                            <div class="text-base font-semibold text-white">{{ user.get_full_name|default:user.username }}</div>
-                            <div class="text-sm font-medium text-gray-400">{{ user.email }}</div>
+                            <div class="text-base font-semibold text-white">{{ user.get_full_name|default:user.username|escape|escape|escape }}</div>
+                            <div class="text-sm font-medium text-gray-400">{{ user.email|escape|escape|escape }}</div>
                         </div>
                     </div>
                 </div>
@@ -429,7 +475,7 @@
                 <div class="mb-4 p-4 rounded-xl animate-slide-up shadow-lg {% if message.tags == 'error' %}bg-red-50 text-red-800 border-l-4 border-red-500{% elif message.tags == 'success' %}bg-green-50 text-green-800 border-l-4 border-green-500{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-800 border-l-4 border-yellow-500{% else %}bg-blue-50 text-blue-800 border-l-4 border-blue-500{% endif %}">
                     <div class="flex items-center">
                         <i data-lucide="{% if message.tags == 'error' %}alert-circle{% elif message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="h-5 w-5 mr-3 animate-pulse"></i>
-                        <span class="font-medium">{{ message }}</span>
+                        <span class="font-medium">{{ message|escape|escape }}</span>
                     </div>
                 </div>
             {% endfor %}
@@ -508,7 +554,7 @@
                     <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-costa-green to-costa-green-light rounded-full mb-6 shadow-lg">
                         <i data-lucide="alert-circle" class="h-10 w-10 text-white"></i>
                     </div>
-                    <h3 class="text-4xl font-bold text-costa-green mb-2 counter">{{ total_avisos }}</h3>
+                    <h3 class="text-4xl font-bold text-costa-green mb-2 counter">{{ total_avisos|escape|escape }}</h3>
                     <p class="text-white font-semibold text-lg mb-1">Avisos Totales</p>
                     <p class="text-sm text-gray-300">Reportes de la comunidad</p>
                     <div class="mt-4 w-full bg-green-900/30 rounded-full h-2">
@@ -520,7 +566,7 @@
                     <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-red-500 to-red-600 rounded-full mb-6 shadow-lg">
                         <i data-lucide="alert-triangle" class="h-10 w-10 text-white animate-pulse"></i>
                     </div>
-                    <h3 class="text-4xl font-bold text-red-400 mb-2 counter">{{ avisos_urgentes }}</h3>
+                    <h3 class="text-4xl font-bold text-red-400 mb-2 counter">{{ avisos_urgentes|escape|escape }}</h3>
                     <p class="text-white font-semibold text-lg mb-1">Avisos Urgentes</p>
                     <p class="text-sm text-gray-300">Requieren atención inmediata</p>
                     <div class="mt-4 w-full bg-red-900/30 rounded-full h-2">
@@ -559,33 +605,33 @@
                 <div class="card-hover bg-gradient-to-br from-costa-gray-dark/80 to-costa-black/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl border border-costa-green/20">
                     <div class="p-8">
                         <div class="flex items-center justify-between mb-6">
-                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold {{ aviso.get_prioridad_bg_color }} shadow-sm">
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold {{ aviso.get_prioridad_bg_color|escape|escape }} shadow-sm">
                                 <i data-lucide="{% if aviso.prioridad == 'urgente' %}alert-triangle{% elif aviso.prioridad == 'alta' %}alert-circle{% elif aviso.prioridad == 'media' %}info{% else %}check-circle{% endif %}" class="h-4 w-4 mr-2"></i>
-                                {{ aviso.get_prioridad_display }}
+                                {{ aviso.get_prioridad_display|escape|escape }}
                             </span>
                             <span class="text-sm text-gray-400 flex items-center bg-costa-gray-dark/50 px-3 py-1 rounded-full">
                                 <i data-lucide="clock" class="h-4 w-4 mr-1"></i>
-                                {{ aviso.tiempo_transcurrido }} atrás
+                                {{ aviso.tiempo_transcurrido|escape|escape }} atrás
                             </span>
                         </div>
                         
                         <h3 class="text-xl font-bold text-white mb-4 hover:text-costa-green transition-colors">
                             <a href="{% url 'aviso_detalle' aviso.pk %}">
-                                {{ aviso.titulo }}
+                                {{ aviso.titulo|escape|escape }}
                             </a>
                         </h3>
                         
-                        <p class="text-gray-300 mb-6 line-clamp-3 leading-relaxed">{{ aviso.descripcion|truncatewords:25 }}</p>
+                        <p class="text-gray-300 mb-6 line-clamp-3 leading-relaxed">{{ aviso.descripcion|truncatewords:25|escape|escape }}</p>
                         
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
                             <div class="flex items-center text-sm text-gray-400 space-x-4">
                                 <span class="flex items-center bg-red-900/30 px-3 py-1 rounded-full border border-red-500/30">
                                     <i data-lucide="map-pin" class="h-4 w-4 mr-1 text-red-400"></i>
-                                    {{ aviso.sector }}
+                                    {{ aviso.sector|escape|escape }}
                                 </span>
                                 <span class="flex items-center bg-blue-900/30 px-3 py-1 rounded-full border border-blue-500/30">
                                     <i data-lucide="tag" class="h-4 w-4 mr-1 text-blue-400"></i>
-                                    {{ aviso.get_tipo_display }}
+                                    {{ aviso.get_tipo_display|escape|escape }}
                                 </span>
                             </div>
                             
